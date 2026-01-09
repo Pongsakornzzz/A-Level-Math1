@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detail – SAT Style</title>
+
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --card:#111418;
+      --card2:#0f1216;
+      --text:#e8e8e8;
+      --muted:#a8b0bb;
+      --line:#222832;
+      --accent:#ffffff;
+      --accent2:#9aa4b2;
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, #1a1f28 0%, var(--bg) 55%) fixed;
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 18px auto 40px;
+      padding: 0 14px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 14px;
+    }
+
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+      color:var(--text);
+      padding:10px 14px;
+      border:1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+    }
+    .back:hover{ background: rgba(255,255,255,0.06); }
+
+    .title{
+      font-weight:800;
+      letter-spacing: .2px;
+      font-size: 18px;
+      margin:0;
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap:12px;
+    }
+    @media (max-width: 880px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+
+    .card h3{
+      margin:0 0 10px;
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: .3px;
+    }
+
+    .scoreRow{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-top: 6px;
+    }
+
+    .bigScore{
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .bigScore span{
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .barRow{
+      display:grid;
+      grid-template-columns: 140px 1fr 70px;
+      gap:10px;
+      align-items:center;
+      margin: 10px 0;
+    }
+    @media (max-width: 520px){
+      .barRow{ grid-template-columns: 120px 1fr 60px; }
+    }
+
+    .barLabel{
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .track{
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius: 999px;
+      background: #fff;
+      transition: width .7s ease;
+    }
+
+    .val{
+      text-align:right;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top: 10px;
+    }
+
+    .chip{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+    }
+
+    .list{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .list b{ color: var(--text); }
+
+    .btnRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top: 12px;
+    }
+
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.06); }
+
+    .loading{
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="index.html">⟵ กลับหน้าแรก</a>
+      <div>
+        <p class="title">Detail (SAT Style)</p>
+        <div class="sub" id="meta">กำลังโหลด…</div>
+      </div>
+      <a class="back" href="quiz.html">ทำข้อสอบอีกครั้ง</a>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>สรุปคะแนน</h3>
+        <div class="scoreRow">
+          <div class="bigScore" id="scoreBig">— <span>/ —</span></div>
+          <div class="pill" id="pillInfo">—</div>
+        </div>
+
+        <div style="height:12px"></div>
+        <h3>ผลรายหมวด</h3>
+        <div id="bars" class="loading">กำลังโหลดกราฟ…</div>
+      </div>
+
+      <div class="card">
+        <h3>ข้อที่ควรทบทวน</h3>
+        <div id="wrongList" class="loading">กำลังโหลด…</div>
+
+        <div class="chips" id="chips"></div>
+
+        <div class="btnRow">
+          <a class="btn" id="openSameAttempt" href="#">↩ เปิด attempt นี้</a>
+          <a class="btn" id="openLatest" href="detail.html">🕒 ดู attempt ล่าสุด</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const meta = document.getElementById("meta");
+    const scoreBig = document.getElementById("scoreBig");
+    const pillInfo = document.getElementById("pillInfo");
+    const bars = document.getElementById("bars");
+    const wrongList = document.getElementById("wrongList");
+    const chips = document.getElementById("chips");
+    const openSameAttempt = document.getElementById("openSameAttempt");
+
+    function getAttemptIdFromUrl(){
+      const p = new URLSearchParams(location.search);
+      return p.get("attempt");
+    }
+
+    function fmtDate(ts){
+      try{
+        if (!ts) return "—";
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleString("th-TH", { dateStyle:"medium", timeStyle:"short" });
+      }catch{
+        return "—";
+      }
+    }
+
+    function animateBars(){
+      requestAnimationFrame(() => {
+        document.querySelectorAll(".fill").forEach(el=>{
+          el.style.width = (el.dataset.pct || "0") + "%";
+        });
+      });
+    }
+
+    function renderAttempt(data){
+      const quiz = data.quiz || "Quiz";
+      const score = data.score ?? 0;
+      const total = data.total ?? 0;
+      const wrongByTopic = data.wrongByTopic || {};
+      const totalByTopic = data.totalByTopic || null;
+      const wrongQsByTopic = data.wrongQsByTopic || {};
+
+      meta.textContent = `${quiz} • ${fmtDate(data.createdAt)}`;
+
+      scoreBig.innerHTML = `${score} <span>/ ${total}</span>`;
+      const ratio = total ? Math.round((score/total)*100) : 0;
+      pillInfo.textContent = `ความถูกต้อง ${ratio}%`;
+
+      // --- bars ---
+      const topics = totalByTopic
+        ? Object.keys(totalByTopic)
+        : Object.keys(wrongByTopic);
+
+      if (!topics.length){
+        bars.textContent = "ไม่มีข้อมูลหมวด";
+      }else{
+        bars.innerHTML = topics.map(t=>{
+          const wrong = wrongByTopic[t] || 0;
+
+          // ถ้ามี totalByTopic จะโชว์เป็น accuracy แบบ SAT
+          if (totalByTopic){
+            const tot = totalByTopic[t] || 0;
+            const correct = Math.max(0, tot - wrong);
+            const pct = tot ? Math.round((correct/tot)*100) : 0;
+            return `
+              <div class="barRow">
+                <div class="barLabel">${t}</div>
+                <div class="track"><div class="fill" data-pct="${pct}" style="width:0%"></div></div>
+                <div class="val">${correct}/${tot}</div>
+              </div>
+            `;
+          }
+
+          // ถ้าไม่มี totalByTopic (กันพัง) โชว์ผิดอย่างเดียว
+          const pct = 0;
+          return `
+            <div class="barRow">
+              <div class="barLabel">${t}</div>
+              <div class="track"><div class="fill" data-pct="${pct}" style="width:0%"></div></div>
+              <div class="val">ผิด ${wrong}</div>
+            </div>
+          `;
+        }).join("");
+
+        animateBars();
+      }
+
+      // --- wrong list + chips ---
+      const wrongTopics = Object.keys(wrongQsByTopic);
+
+      if (!wrongTopics.length){
+        wrongList.innerHTML = `<div style="color:#cfe9d6; font-weight:800;">🎉 ไม่ผิดเลย! พร้อมลุย</div>`;
+        chips.innerHTML = "";
+        return;
+      }
+
+      wrongList.innerHTML = wrongTopics.map(t=>{
+        const qs = wrongQsByTopic[t] || [];
+        return `<div class="list"><b>${t}</b> : ข้อ ${qs.join(", ")}</div>`;
+      }).join("");
+
+      chips.innerHTML = wrongTopics.map(t=>{
+        const w = (wrongByTopic[t] || 0);
+        return `<span class="chip">${t} • ผิด ${w} ข้อ</span>`;
+      }).join("");
+    }
+
+    async function loadAttempt(uid, attemptId){
+      // 1) ถ้ามี id ใน url → โหลดอันนั้น
+      if (attemptId){
+        const ref = doc(db, "users", uid, "attempts", attemptId);
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          openSameAttempt.href = `detail.html?attempt=${attemptId}`;
+          renderAttempt(snap.data());
+          return;
+        }
+      }
+
+      // 2) ถ้าไม่มี id หรือหาไม่เจอ → โหลดล่าสุด
+      const q = query(
+        collection(db, "users", uid, "attempts"),
+        orderBy("createdAt", "desc"),
+        limit(1)
+      );
+      const snaps = await getDocs(q);
+      if (!snaps.empty){
+        const doc0 = snaps.docs[0];
+        const id = doc0.id;
+        openSameAttempt.href = `detail.html?attempt=${id}`;
+        renderAttempt(doc0.data());
+        return;
+      }
+
+      meta.textContent = "ยังไม่มี attempt ในระบบ";
+      bars.textContent = "—";
+      wrongList.textContent = "—";
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user){
+        alert("ต้องล็อกอินก่อนนะ 😎");
+        location.href = "login.html";
+        return;
+      }
+      try{
+        const attemptId = getAttemptIdFromUrl() || localStorage.getItem("lastAttemptId");
+        await loadAttempt(user.uid, attemptId);
+      }catch(e){
+        console.error(e);
+        meta.textContent = "โหลดไม่สำเร็จ";
+        bars.textContent = "เกิดข้อผิดพลาดในการโหลด";
+        wrongList.textContent = "—";
+      }
+    });
+  </script>
+</body>
+</html>

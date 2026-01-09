@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A-Level Math Practice</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --text:#0d0f12;
+  --muted:#4f5a66;
+  --panelSolid:#ffffff;
+  --border:#111;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Prompt,system-ui;
+  color:var(--text);
+
+  /* Bright pastel background */
+  background:
+    radial-gradient(1100px 700px at 12% 12%, rgba(120,210,255,.65), transparent 60%),
+    radial-gradient(1100px 700px at 88% 84%, rgba(255,214,140,.65), transparent 60%),
+    radial-gradient(900px 520px at 50% 30%, rgba(255,255,255,1), rgba(255,255,255,0) 70%),
+    linear-gradient(#fbfbff,#f6f7ff);
+  min-height:100vh;
+}
+
+/* Top */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+  background:rgba(255,255,255,.35);
+  backdrop-filter: blur(10px);
+}
+header b{font-size:18px}
+header span{color:var(--muted);font-size:13px}
+
+/* Hero */
+.hero{
+  max-width:1000px;
+  margin:60px auto 30px;
+  padding:0 20px;
+  text-align:center;
+}
+.hero h1{
+  font-size:44px;
+  font-weight:900;
+  line-height:1.18;
+  margin:0;
+}
+.hero p{
+  margin:14px auto 0;
+  font-size:16px;
+  color:var(--muted);
+  max-width:720px;
+}
+
+/* Cards */
+.grid{
+  max-width:1000px;
+  margin:34px auto 60px;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+}
+.card{
+  background:var(--panelSolid);
+  border:2px solid var(--border);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:10px 10px 0 rgba(0,0,0,.12);
+  transition:transform .18s, box-shadow .18s;
+}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:14px 14px 0 rgba(0,0,0,.12);
+}
+.card h3{margin:0;font-size:20px;font-weight:900}
+.card p{color:var(--muted);font-size:14px;margin:8px 0 16px}
+
+/* ========= Animated Neo Buttons (Login + Card links) ========= */
+.neo-btn{
+  position:relative;
+  overflow:hidden;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px 18px;
+  border-radius:14px;
+
+  background:linear-gradient(90deg,#7fe7ff,#ffe08a);
+  color:#000;
+  font-weight:800;
+  text-decoration:none;
+
+  border:2px solid var(--border);
+  box-shadow:6px 6px 0 var(--border);
+
+  transition:transform .15s, box-shadow .15s, filter .15s;
+  user-select:none;
+  will-change: transform;
+}
+
+.neo-btn:hover{
+  transform:translate(-2px,-2px);
+  box-shadow:8px 8px 0 var(--border);
+  filter:saturate(1.05);
+}
+
+.neo-btn:active{
+  transform:translate(2px,2px);
+  box-shadow:4px 4px 0 var(--border);
+}
+
+.neo-btn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(127,231,255,.6), 6px 6px 0 var(--border);
+}
+
+.neo-btn .ripple{
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  background:rgba(255,255,255,.75);
+  animation:ripple .55s ease-out forwards;
+  mix-blend-mode:overlay;
+}
+
+.neo-btn.pop{
+  animation:pop .22s ease-out;
+}
+
+@keyframes ripple{
+  from{opacity:.8; transform:translate(-50%,-50%) scale(0)}
+  to{opacity:0; transform:translate(-50%,-50%) scale(14)}
+}
+@keyframes pop{
+  0%{transform:translate(0,0) scale(1)}
+  40%{transform:translate(-2px,-2px) scale(1.03)}
+  100%{transform:translate(0,0) scale(1)}
+}
+
+
+.card a.neo-btn{
+  width:100%;
+  padding:12px 14px;
+  font-weight:900;
+}
+
+
+@media (max-width:520px){
+  .hero{margin:44px auto 22px}
+  .hero h1{font-size:34px}
+}
+
+.userbox{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.username-pill{
+  padding:10px 14px;
+  border:2px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.75);
+  backdrop-filter: blur(10px);
+  box-shadow:6px 6px 0 rgba(0,0,0,.12);
+  font-weight:900;
+  color:#000;
+
+  max-width:180px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+button.neo-btn{
+  appearance:none;
+  -webkit-appearance:none;
+  font: inherit;
+  cursor:pointer;
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <b>A-Level Math</b><br>
+    <span>By Dr.Sharkz</span>
+  </div>
+
+  <!-- ยังไม่ล็อกอิน -->
+  <a class="neo-btn" href="login.html" id="loginLink">Login</a>
+
+  <!-- ล็อกอินแล้ว -->
+  <div class="userbox" id="userBox" style="display:none;">
+    <span class="username-pill" id="usernameLabel">User</span>
+    <button class="neo-btn" id="logoutBtn" type="button">Logout</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>
+    ฝึก A-Level คณิตศาสตร์<br>
+    แบบของจริง  
+  </h1>
+  <p>
+    ตั้งใจทำนะเพื่ออนาคตของเรา
+  </p>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h3>A-Level Math 68</h3>
+    <p>ข้อสอบล่าสุด แนววิเคราะห์</p>
+    <a class="neo-btn" href="quiz1.html">เริ่มทำข้อสอบ</a>
+  </div>
+
+  <div class="card">
+    <h3>A-Level Math 67</h3>
+    <p>ฝึกข้อสอบย้อนหลัง</p>
+    <a class="neo-btn" href="quiz2.html">เริ่มทำข้อสอบ</a>
+  </div>
+
+  <div class="card">
+    <h3>A-Level Math 66</h3>
+    <p>พื้นฐาน + จับแนว</p>
+    <a class="neo-btn" href="quiz3.html">เริ่มทำข้อสอบ</a>
+  </div>
+</section>
+
+<script>
+document.querySelectorAll('.neo-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // pop
+    btn.classList.remove('pop');
+    void btn.offsetWidth; // reflow
+    btn.classList.add('pop');
+
+    // ripple
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.left = (e.clientX - rect.left) + 'px';
+    ripple.style.top  = (e.clientY - rect.top) + 'px';
+    btn.appendChild(ripple);
+
+    ripple.addEventListener('animationend', () => ripple.remove());
+  });
+});
+</script>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const loginLink = document.getElementById("loginLink");
+  const userBox = document.getElementById("userBox");
+  const usernameLabel = document.getElementById("usernameLabel");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  function showLoggedOut(){
+    loginLink.style.display = "inline-flex";
+    userBox.style.display = "none";
+    usernameLabel.textContent = "User";
+  }
+
+  function showLoggedIn(name){
+    loginLink.style.display = "none";
+    userBox.style.display = "flex";
+    usernameLabel.textContent = name || "User";
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showLoggedOut();
+      return;
+    }
+
+    let displayName = "";
+    try{
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if(snap.exists()){
+        const data = snap.data();
+        displayName = (data.username || data.displayName || "").trim();
+      }
+    }catch(e){
+      console.warn("Fetch profile failed:", e);
+    }
+
+    // fallback ถ้ายังไม่มี username
+    if(!displayName){
+      displayName = (user.email || "User").split("@")[0];
+    }
+
+    showLoggedIn(displayName);
+  });
+
+  logoutBtn?.addEventListener("click", async () => {
+    await signOut(auth);
+    showLoggedOut();
+    // จะให้เด้งไปหน้า login ก็ได้:
+    // location.href = "login.html";
+  });
+</script>
+
+
+</body>
+</html>

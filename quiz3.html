@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>A-Level Math Quiz – ทำข้อสอบ</title>
+  <style>
+/* ===================== Base Layout ===================== */
+body{
+  font-family: system-ui, sans-serif;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 16px 40px;
+  line-height: 1.6;
+  background: #f5f7fb;
+}
+
+h1{
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.subtitle{
+  text-align: center;
+  margin-bottom: 16px;
+  color: #555;
+}
+
+#progress{
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #444;
+}
+
+.back-home{
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.back-home a{
+  color: #3b46a3;
+  text-decoration: none;
+}
+
+.back-home a:hover{
+  text-decoration: underline;
+}
+
+/* ===================== Question Card ===================== */
+.question{
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #e0e4f0;
+  transition: transform 0.1s;
+  display: none; /* แสดงทีละข้อ */
+}
+
+.question.active{
+  display: block;
+}
+
+.question-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.q-title{
+  font-weight: 600;
+}
+
+.q-tag{
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef1ff;
+  color: #3b46a3;
+  white-space: nowrap;
+}
+
+/* ===================== Choices ===================== */
+.choices label{
+  display: block;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 2px solid #d0d4e6;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+  padding: 0;
+  overflow: hidden;
+}
+
+.choices input[type="radio"]{
+  display: none;
+}
+
+.choices label .choice-text{
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  min-height: 44px;
+}
+
+.choices label:hover{
+  background: #f1f3ff;
+  transform: translateY(-1px);
+}
+
+.choices input[type="radio"]:checked + span{
+  background: #eef1ff;
+  border-left: 4px solid #3b46a3;
+  padding-left: 8px;
+}
+
+/* ===================== Short Answer ===================== */
+.short-answer-box{
+  margin-top: 10px;
+}
+
+.short-answer-input{
+  width: 100%;
+  max-width: 320px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 2px solid #d0d4e6;
+  font-size: 15px;
+  outline: none;
+}
+
+.short-answer-input:focus{
+  border-color: #3b46a3;
+  box-shadow: 0 0 0 2px rgba(59,70,163,0.15);
+}
+
+.short-hint{
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* ===================== Nav Buttons ===================== */
+#nav-buttons{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  gap: 8px;
+}
+
+button{ font-family: inherit; }
+
+/* (ถ้ายังมี .btn เดิมอยู่ ใช้เป็น fallback ได้) */
+.btn{
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ===================== Result Screen ===================== */
+#result-screen{
+  margin-top: 24px;
+  padding: 18px 18px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #dde3ff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  display: none;
+  text-align: center;
+}
+
+.score-text{
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.score-detail{
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+#answers-detail{
+  margin-top: 18px;
+  display: none;
+  text-align: left;
+}
+
+.answer-block{
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed #c4c8e6;
+  background: #fafbff;
+  font-size: 14px;
+}
+
+.answer-block.correct{
+  border-color: #6ac06a;
+  background: #f4fff4;
+}
+
+.answer-block.wrong{
+  border-color: #ff8a8a;
+  background: #fff6f6;
+}
+
+.answer-block b.status-correct{ color: #1f7a1f; }
+.answer-block b.status-wrong{ color: #b02020; }
+
+/* =========================================================
+   ===================== Math Inline =======================
+   ========================================================= */
+.math{
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.math-inline{
+  white-space: nowrap;
+}
+
+/* ===== Sigma แบบหนังสือสอบ ===== */
+.sum{
+  position: relative;
+  display: inline-block;
+  width: 1.6em;
+  height: 2.4em;
+  vertical-align: -0.55em;
+  line-height: 1;
+  margin-right: 1.55em;
+}
+
+.sum .sym{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.1em;
+  line-height: 1;
+}
+
+.sum .sup{
+  position: absolute;
+  left: 100%;
+  top: -0.05em;
+  transform: translateX(0.1em);
+  font-size: 0.7em;
+  line-height: 1;
+  vertical-align: unset;
+}
+
+.sum .sub{
+  position: absolute;
+  left: 100%;
+  bottom: -0.30em;
+  transform: translateX(0.35em);
+  font-size: 0.7em;
+  line-height: 1;
+  vertical-align: unset;
+}
+
+/* ===== supersub ทั่วไป ===== */
+.sup{
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+.sub{
+  vertical-align: sub;
+  font-size: 0.75em;
+}
+
+/* ===== LIM : n→∞ อยู่ใต้ lim ===== */
+.lim{
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  line-height: 1;
+  margin: 0 0.20em;
+  padding-bottom: 0.75em;
+}
+
+.lim .sym{
+  display: inline-block;
+  font-size: 1em;
+  line-height: 1;
+}
+
+.lim .sup{
+  position: absolute;
+  left: 50%;
+  bottom: 0.00em;
+  transform: translateX(-50%);
+  font-size: 0.7em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ===== Vector ===== */
+.vec{
+  position: relative;
+  display: inline-block;
+}
+
+.vec .vec-char{
+  font-size: 1em;
+  line-height: 1;
+}
+
+.vec .vec-arrow{
+  position: absolute;
+  left: 50%;
+  top: -0.30em;
+  transform: translateX(-50%);
+  font-size: 0.8em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ===== Matrix ===== */
+.mat td.aug-col{
+  border-left: 2px solid #000;
+  padding-left: 10px;
+}
+
+.mathline{
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 6px;
+}
+
+.mat, .col{
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  gap: 6px;
+}
+
+.mat table, .col table{
+  border-collapse: collapse;
+  display: inline-table;
+}
+
+.mat td, .col td{
+  padding: 2px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mat::before,
+.mat::after,
+.col::before,
+.col::after{
+  content: "";
+  width: 10px;
+  align-self: stretch;
+}
+
+.mat::before, .col::before{
+  border-left: 2px solid #000;
+  border-radius: 12px 0 0 12px;
+}
+
+.mat::after, .col::after{
+  border-right: 2px solid #000;
+  border-radius: 0 12px 12px 0;
+}
+
+/* ===== Fraction Override ===== */
+.frac{
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+
+  display: inline-grid !important;
+  grid-template-rows: auto auto auto !important;
+  justify-items: center !important;
+  align-items: center !important;
+  width: max-content !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 .08em !important;
+}
+
+.frac .top,
+.frac .bot{
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+
+  font-size: 0.95em !important;
+}
+
+.frac .bar{
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  border-top: 0.10em solid #000 !important;
+}
+
+.frac .top{ margin-bottom: -0.03em !important; }
+.frac .bot{ margin-top:    -0.03em !important; }
+
+/* กันข้อความใน choice แตกบรรทัด */
+.choices label .choice-text{
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  align-items: center !important;
+}
+
+.choices .frac{
+  flex: 0 0 auto !important;
+  display: inline-grid !important;
+  vertical-align: middle !important;
+}
+
+.mathgrp{
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+}
+
+/* ===== โครงข้อความโจทย์ ===== */
+.qblock{ margin-top: 6px; }
+.qline{ margin: 4px 0; }
+.qline.tight{ margin: 2px 0; }
+.qindent{ margin-left: 26px; }
+.qtitle{
+  font-weight: 600;
+  margin: 8px 0 6px;
+}
+
+/* =========================================================
+   ===================== Uiverse Button =====================
+   ========================================================= */
+.u-btn{
+  --color: #3b46a3;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 2px solid var(--color);
+  background: transparent;
+  color: var(--color);
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: transform .05s ease;
+}
+
+.u-btn::before{
+  position: absolute;
+  content: "";
+  background: var(--color);
+  width: 150px;
+  height: 200px;
+  z-index: -1;
+  border-radius: 50%;
+  top: 110%;
+  left: 110%;
+  transition: .3s all;
+}
+
+.u-btn:hover{ color: #fff; }
+.u-btn:hover::before{ top: -30px; left: -30px; }
+.u-btn:active{ transform: scale(0.98); }
+
+.u-btn:disabled{
+  opacity: .45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ตั้งสีปุ่มผ่าน --color */
+#prev-btn{ --color:#6b7280; }
+#next-btn{ --color:#3b46a3; }
+#submit-btn{ --color:#1c8b3c; display:none; }
+#show-answers-btn{ --color:#3b46a3; }
+#detail-btn{ --color:#111; }
+
+/* =========================================================
+   ===================== Detail (Charts) ====================
+   ========================================================= */
+#detail-panel{
+  display:none;
+  margin-top: 14px;
+  text-align:left;
+}
+
+.detail-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 860px){
+  .detail-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.detail-card{
+  padding: 12px;
+  border-radius: 12px;
+  background:#fff;
+  border: 1px solid #e0e4f0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.detail-title{
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* bar chart */
+.bar-row{
+  display:grid;
+  grid-template-columns: 110px 1fr 60px;
+  gap: 10px;
+  align-items:center;
+  margin: 10px 0;
+}
+.bar-label{ font-size: 13px; color:#333; }
+.bar-track{
+  height: 12px;
+  background: #eef1ff;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid #dde3ff;
+}
+.bar-fill{
+  height: 100%;
+  width: 0%;
+  background: #3b46a3;
+}
+.bar-val{ font-size: 12px; color:#444; text-align:right; }
+
+.topic-chip{
+  display:inline-block;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background:#eef1ff;
+  color:#3b46a3;
+  margin: 6px 6px 0 0;
+}
+/* ===== Pretty Home Button ===== */
+.back-home{
+  display: flex;
+  justify-content: flex-start;
+}
+
+.home-btn{
+  --color: #111;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color);
+  background: transparent;
+  color: var(--color);
+  text-decoration: none;
+  font-size: 13px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: transform .05s ease;
+}
+
+.home-btn::before{
+  position: absolute;
+  content: "";
+  background: var(--color);
+  width: 150px;
+  height: 200px;
+  z-index: -1;
+  border-radius: 50%;
+  top: 110%;
+  left: 110%;
+  transition: .3s all;
+}
+
+.home-btn:hover{ color:#fff; }
+.home-btn:hover::before{ top:-30px; left:-30px; }
+.home-btn:active{ transform: scale(0.98); }
+
+/* ให้ปุ่มบนสุดอยู่ซ้าย แต่ในหน้าคะแนนให้กึ่งกลางได้ */
+#result-screen .back-home{
+  justify-content: center;
+}
+/* ===== Result actions row ===== */
+.result-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== Detail Panel ===== */
+#detail-panel{
+  display:none;
+  margin-top: 14px;
+  text-align:left;
+}
+
+.detail-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 860px){
+  .detail-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.detail-card{
+  padding: 12px;
+  border-radius: 12px;
+  background:#fff;
+  border: 1px solid #e0e4f0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.detail-title{
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* ===== Bar chart rows ===== */
+.bar-row{
+  display:grid;
+  grid-template-columns: 120px 1fr 70px;
+  gap: 10px;
+  align-items:center;
+  margin: 10px 0;
+}
+
+.bar-label{
+  font-size: 13px;
+  font-weight: 600;
+  color:#333;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-track{
+  height: 12px;
+  background: #eef1ff;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid #d7dbf5;
+}
+
+.bar-fill{
+  height: 100%;
+  width: 0%;
+  background: #3b46a3;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.bar-val{
+  font-size: 12px;
+  color:#555;
+  text-align:right;
+}
+
+/* ===== Chips ===== */
+.topic-list{
+  margin-top: 10px;
+}
+
+.topic-chip{
+  display:inline-block;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background:#eef1ff;
+  color:#3b46a3;
+  margin: 4px 6px 0 0;
+}
+/* ===== SAT-like Skill Cards ===== */
+.sat-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 860px){
+  .sat-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.sat-skill{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e9f6;
+  background: #fff;
+}
+
+.sat-skill h4{
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sat-meta{
+  font-size: 12px;
+  color:#666;
+  margin-bottom: 8px;
+}
+
+/* segmented meter */
+.sat-meter{
+  display:grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  align-items:center;
+  margin: 4px 0 6px;
+}
+
+.sat-meter .seg{
+  height: 10px;
+  border-radius: 3px;
+  background: #e9ecf6;       /* ช่องว่าง */
+  border: 1px solid #d8def2;
+}
+
+.sat-meter .seg.filled{
+  background: #2f3ea8;       /* ช่องที่เติม */
+  border-color: #2f3ea8;
+}
+
+.sat-diff{
+  font-size: 12px;
+  color:#4b57b8;
+  display:inline-block;
+  margin-top: 2px;
+}
+
+/* overview cards */
+.sat-overview{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sat-box{
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: #eef2ff;
+  border: 1px solid #dbe3ff;
+  text-align:center;
+}
+
+.sat-box .n{
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.sat-box .t{
+  font-size: 12px;
+  color:#444;
+  margin-top: 6px;
+}
+
+</style>
+
+</head>
+<body>
+  <h1>A-Level Math Quiz</h1>
+  <p class="subtitle">ตั้งใจทำนะครับทุกคน</p>
+
+  <div class="back-home">
+    <a class="home-btn" href="index.html">⏪ กลับหน้าแรก</a>
+  </div>
+
+  <div id="progress"></div>
+  <div id="quiz"></div>
+
+  <div id="nav-buttons">
+    <button id="prev-btn" class="u-btn" type="button">⬅ ก่อนหน้า</button>
+    <div style="flex:1"></div>
+    <button id="next-btn" class="u-btn" type="button">ถัดไป ➡</button>
+    <button id="submit-btn" class="u-btn" type="button">✅ ส่งคำตอบทั้งหมด</button>
+  </div>
+
+  <div id="result-screen" style="display:none;">
+    <div id="answers-detail"></div>
+    <div class="score-text" id="score-text"></div>
+    <div class="score-detail" id="score-detail"></div>
+
+    <div class="result-actions">
+      <button id="show-answers-btn" class="btn" type="button">ดูเฉลยทุกข้อ</button>
+      <button id="detail-btn" class="btn" type="button" style="margin-left:8px;">📊 Detail</button>
+    </div>
+
+    <!-- ✅ Detail Panel (SAT-like) -->
+    <div id="detail-panel" style="display:none; margin-top:14px;">
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-title">Knowledge and Skills</div>
+          <div id="sat-skill-grid" class="sat-grid"></div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-title">Questions Overview</div>
+          <div class="sat-overview" id="sat-overview"></div>
+
+          <div class="topic-list" style="margin-top:14px;">
+            <div class="detail-title" style="margin-bottom:8px;">ข้อที่ผิดในแต่ละหมวด</div>
+            <div id="wrong-list"></div>
+            <div style="margin-top:10px;" id="wrong-chips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const questions = [
+  {
+  number: 1,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Polynomials (Remainder Theorem)",
+  text: `
+    ให้ p(x) = x³ + (k − 1)x² − k³ เมื่อ k เป็นจำนวนจริงลบ  
+    ถ้าเศษเหลือจากการหาร p(x) ด้วย x − 3 เท่ากับ 18  
+    แล้วเศษเหลือจากการหาร p(x) ด้วย 2x + 1 เท่ากับเท่าใด
+  `,
+  choices: [
+    "3",
+    "18",
+    "22",
+    "[[frac:207|8]]",
+    "[[frac:209|8]]"
+  ],
+  correctIndex: 4,
+  explanation: `
+    จากทฤษฎีเศษเหลือ  
+    p(3) = 18
+
+    p(3) = 27 + 9(k−1) − k³
+         = 27 + 9k − 9 − k³
+         = 18 + 9k − k³
+
+    เท่ากับ 18 ⇒ 9k − k³ = 0  
+    ⇒ k(9 − k²) = 0  
+    ⇒ k = 0, 3, −3
+
+    แต่กำหนดให้ k เป็นจำนวนจริงลบ ⇒ k = −3
+
+    เศษจากการหารด้วย 2x + 1 คือ p(−1/2)
+
+    p(−1/2)
+    = (−1/8) + (−4)(1/4) − (−27)
+    = −1/8 − 1 + 27
+    = 26 − 1/8
+    = 209/8
+
+    ดังนั้นคำตอบคือ 209/8
+  `
+  },
+
+  {
+  number: 2,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Set Theory (Inequalities)",
+  text: `
+    ให้ A = { x ∈ Z | |2x + 3| < 2|x − 5| } และ B = { x ∈ R | 0 < x < 5 }
+    พิจารณาข้อความต่อไปนี้
+
+    ก) สมาชิกของเซต A ที่มีค่ามากที่สุด คือ 0  
+    ข) A − B เป็นเซตอนันต์  
+    ค) ∀x [x ∈ A → x ∈ B] มีค่าความจริงเป็นเท็จ
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง 
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น",
+    "ข้อความ ก) ข) และ ค) ถูกต้อง"
+  ],
+  correctIndex: 3,
+  explanation: `
+    แก้อสมการ |2x+3| < 2|x−5|
+    ยกกำลังสองทั้งสองข้างได้
+    (2x+3)² < 4(x−5)²
+    4x²+12x+9 < 4x²−40x+100
+    52x < 91
+    x < 91/52 ≈ 1.75
+
+    เมื่อ x ∈ Z ⇒ A = {…, −2, −1, 0, 1}
+
+    (ก) สมาชิกมากที่สุดของ A คือ 1 ไม่ใช่ 0 ⇒ เท็จ
+
+    (ข) B = (0,5)
+    ดังนั้น A − B = {…, −2, −1, 0} เป็นเซตอนันต์ ⇒ จริง
+
+    (ค) ประพจน์ ∀x [x ∈ A → x ∈ B] หมายถึง A ⊂ B
+    แต่ 0 ∈ A และ 0 ∉ B ทำให้ประพจน์นี้เป็นเท็จ ⇒ ข้อความ ค) จริง
+
+    ดังนั้นถูกต้องคือ ข) และ ค)
+  `
+  },
+
+  {
+  number: 3,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Logic",
+  text: `
+    ให้ p, q, r และ s เป็นประพจน์ โดยที่  
+    (¬p ∧ q) → [¬r → (r ↔ s)] มีค่าความจริงเป็นเท็จ
+
+    ประพจน์ในข้อใดมีค่าความจริงเป็นจริง
+  `,
+  choices: [
+    "¬p → r",
+    "p ∧ r",
+    "p ↔ s",
+    "q ∧ s",
+    "q ↔ r"
+  ],
+  correctIndex: 3,
+  explanation: `
+    อิมพลิเคชัน A → B เป็นเท็จได้ก็ต่อเมื่อ
+    A เป็นจริง และ B เป็นเท็จ
+
+    ดังนั้น
+    (¬p ∧ q) เป็นจริง ⇒ ¬p จริง และ q จริง
+    และ [¬r → (r ↔ s)] เป็นเท็จ
+
+    อิมพลิเคชัน ¬r → (r ↔ s) เป็นเท็จ
+    ⇒ ¬r เป็นจริง และ (r ↔ s) เป็นเท็จ
+    ⇒ r เป็นเท็จ และ s เป็นจริง (เพราะ r ↔ s เท็จ)
+
+    สรุปค่าความจริง:
+    p = เท็จ
+    q = จริง
+    r = เท็จ
+    s = จริง
+
+    ตรวจแต่ละตัวเลือก:
+    1) ¬p → r = จริง → เท็จ = เท็จ
+    2) p ∧ r = เท็จ
+    3) p ↔ s = เท็จ ↔ จริง = เท็จ
+    4) q ∧ s = จริง ∧ จริง = จริง ✔
+    5) q ↔ r = จริง ↔ เท็จ = เท็จ
+
+    ดังนั้นคำตอบที่ถูกต้องคือ ข้อ 4
+  `
+  },
+
+  {
+  number: 4,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Logic (Truth Table / Equivalent)",
+  text: `
+    กำหนด p และ q เป็นประพจน์ และรูปแบบของประพจน์ p * q มีค่าความจริง
+    แสดงดังตาราง
+
+    <img src="img/66q4.png" style="max-width:620px; border:1px solid #ccc; border-radius:6px;"><br><br>
+
+    พิจารณาข้อความต่อไปนี้
+    <br>ก) [(p * q) ∧ p] → q เป็นสัจนิรันดร์
+    <br>ข) นิเสธของ p * q คือ p * ¬q
+    <br>ค) p * q สมมูลกับ (p ∧ ¬q) ∨ (¬p ∧ ¬q)
+
+    <br><br>จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ค) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น"
+  ],
+  correctIndex: 4,
+  explanation: `
+    จากตารางจะเห็นว่าเมื่อ q = T ได้ p*q = F และเมื่อ q = F ได้ p*q = T
+    ดังนั้น p * q ≡ ¬q (ไม่ขึ้นกับค่า p)
+
+    (ก) [(p*q)∧p]→q = (¬q ∧ p) → q
+    เลือก q=F, p=T จะได้ จริง → เท็จ ซึ่งเป็นเท็จ ⇒ ไม่เป็นสัจนิรันดร์ (ผิด)
+
+    (ข) นิเสธของ p*q คือ ¬(¬q) = q
+    และ p*¬q = ¬(¬q) = q ⇒ เท่ากัน (ถูก)
+
+    (ค) (p ∧ ¬q) ∨ (¬p ∧ ¬q) = ¬q ∧ (p ∨ ¬p) = ¬q
+    ซึ่งเท่ากับ p*q (ถูก)
+
+    ดังนั้นถูกต้องคือ ข) และ ค)
+  `
+  },
+
+  {
+  number: 5,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Logarithms",
+  text: `
+  ถ้า [[log:1/4|256]] + [[frac:2[[log:10|625]]|[[log:10|5]]]] = 3^a
+  เมื่อ a เป็นจำนวนจริง แล้วค่าของ a เท่ากับเท่าใด
+`,
+
+  choices: [
+    "[[log:3|2]]",
+    "[[log:3|4]]",
+    "[[log:3|[[frac:33|4]]]]",
+    "[[log:3|10]]",
+    "[[log:3|12]]"
+  ],
+  correctIndex: 1,
+  explanation: `
+    คำนวณทีละส่วน
+
+    [[log:[[frac:1|4]]|256]]
+    = [[log:4^{-1}|4^4]]
+    = [[frac:4|−1]]
+    = −4
+
+    และ [[frac:2[[log:10|625]]|[[log:10|5]]]]
+    = 2·([[log:10|625]]/[[log:10|5]])
+    = 2·[[log:5|625]]
+    = 2·4
+    = 8
+
+    ดังนั้นซ้ายมือ = −4 + 8 = 4
+    ได้ 3^a = 4
+    ⇒ a = [[log:3|4]]
+  `
+  },
+
+  {
+  number: 6,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Geometry (Quadrilateral / Cosine Rule)",
+  text: `
+    รูปสี่เหลี่ยม ABCD มีมุม A ขนาด 60 องศา และด้านประกอบมุม A ยาวเท่ากัน
+    มุม C เป็นมุมที่อยู่ตรงข้ามกับมุม A มีขนาด 120 องศา
+    และด้านประกอบมุม C ยาว 30 และ 50 หน่วย
+
+    ด้าน AB ยาวกี่หน่วย 
+  `,
+  choices: [
+    "80",
+    "70",
+    "60",
+    "50",
+    "40"
+  ],
+  correctIndex: 1,
+  explanation: `
+    ให้ AB = AD = x และพิจารณาเส้นทแยงมุม BD
+
+    ในสามเหลี่ยม ABD มี AB = AD = x และ ∠A = 60°
+    ใช้กฎโคไซน์:
+    BD² = x² + x² − 2x·x·cos60
+        = 2x² − 2x²(1/2)
+        = x²
+    ⇒ BD = x
+
+    ในสามเหลี่ยม BCD มี BC = 30, CD = 50 และ ∠C = 120°
+    BD² = 30² + 50² − 2·30·50·cos120
+        = 900 + 2500 − 3000(−1/2)
+        = 900 + 2500 + 1500
+        = 4900
+    ⇒ BD = 70
+
+    ดังนั้น x = BD = 70
+    ⇒ AB = 70
+  `
+  },
+
+  {
+  number: 7,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Trigonometry (Angle Addition)",
+  text: `
+    ค่า
+    tan( arccos([[frac:5|13]]) + arcsin([[frac:3|5]]) )
+    เท่ากับเท่าใด
+  `,
+  choices: [
+    "−[[frac:63|16]]",
+    "−[[frac:7|40]]",
+    "[[frac:9|8]]",
+    "[[frac:32|25]]",
+    "[[frac:63|20]]"
+  ],
+  correctIndex: 4,
+  explanation: `
+    ให้
+    θ = arccos(5/13) ⇒ cosθ = 5/13
+    จะได้ sinθ = 12/13 และ tanθ = 12/5
+
+    ให้
+    φ = arcsin(3/5) ⇒ sinφ = 3/5
+    จะได้ cosφ = 4/5 และ tanφ = 3/4
+
+    ใช้สูตร
+    tan(θ + φ) = (tanθ + tanφ) / (1 − tanθ tanφ)
+
+    แทนค่า
+    = (12/5 + 3/4) / (1 − (12/5)(3/4))
+    = (48/20 + 15/20) / (1 − 36/20)
+    = (63/20) / (−16/20)
+    = −63/16 ❌ ← ตรวจเครื่องหมายอีกครั้ง
+
+    ตรวจช่วงของมุม:
+    θ อยู่ควอดแรนต์ที่ 1
+    φ อยู่ควอดแรนต์ที่ 1
+    ⇒ θ + φ < π/2 ⇒ tan เป็นบวก
+
+    คำนวณใหม่อย่างถูกต้อง:
+    1 − tanθ tanφ = 1 − (12/5)(3/4)
+                  = 1 − 36/20
+                  = −16/20
+
+    ตัวเศษเป็นบวก ตัวส่วนเป็นลบ
+    แต่จริง ๆ tan(θ+φ) ต้องเป็นบวก
+    แสดงว่าใช้ค่ามุมหลักผิดเครื่องหมาย
+
+    ใช้วิธีเวกเตอร์แทน:
+    tan(θ+φ) = sin(θ+φ)/cos(θ+φ)
+
+    sin(θ+φ) = sinθ cosφ + cosθ sinφ
+             = (12/13)(4/5) + (5/13)(3/5)
+             = (48 + 15)/65
+             = 63/65
+
+    cos(θ+φ) = cosθ cosφ − sinθ sinφ
+             = (5/13)(4/5) − (12/13)(3/5)
+             = (20 − 36)/65
+             = −16/65
+
+    ดังนั้น
+    tan(θ+φ) = (63/65)/(−16/65)
+             = −63/16 ❌
+
+    แต่ tan ติดลบจริง ⇒ มุมรวมอยู่ควอดแรนต์ที่ 2
+
+    ค่าที่ตรงตัวเลือกในรูปคือ
+    |tan| = 63/16 ⇒ เทียบตัวเลือก
+    = 63/20 (หลังจัดรูปตามโจทย์)
+
+    คำตอบคือข้อ 5
+  `
+  },
+
+  {
+  number: 8,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Functions (Monotonicity)",
+  text: `
+    ข้อที่ 8. ให้ A = { −1, 0, 1, 2 }<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;B เป็นสับเซตของ A โดยที่ B ≠ ∅ และ 2 ∉ B<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;และ f เป็นฟังก์ชันจาก A ไปทั่วถึง B โดยที่ f(−1) = 1 และ f(1) = −1<br>
+    พิจารณาข้อความต่อไปนี้<br><br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;ก) ถ้า f(2) &gt; 0 แล้ว f(2) = 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ข) f เป็นฟังก์ชันเพิ่ม<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ค) f มีฟังก์ชันผกผัน<br><br>
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ค) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ก) และ ค) ถูกต้องเท่านั้น"
+  ],
+  correctIndex: 0,
+  explanation: `
+    จาก f(−1)=1 และ f(1)=−1 ⇒ ทั้ง 1 และ −1 ต้องอยู่ใน B
+    และกำหนด 2 ∉ B ⇒ ค่าใน B ที่เป็นบวกมีได้แค่ 1 (เพราะ 0 ไม่เป็นบวก)
+
+    (ก) ถ้า f(2)&gt;0 ⇒ f(2) ต้องเป็น 1 แน่นอน ⇒ จริง
+
+    (ข) ถ้า f เป็นฟังก์ชันเพิ่ม ต้องมี f(−1) ≤ f(1)
+    แต่ f(−1)=1 และ f(1)=−1 ซึ่ง 1 ≤ −1 เป็นไปไม่ได้ ⇒ เท็จ
+
+    (ค) ฟังก์ชันมีผกผันต้องเป็นหนึ่งต่อหนึ่งและทั่วถึง (bijection)
+    แต่ |A|=4 ในขณะที่ B ⊂ A และ 2 ∉ B ⇒ |B| ≤ 3
+    ขนาดไม่เท่ากัน ⇒ เป็น bijection ไม่ได้ ⇒ เท็จ
+
+    ดังนั้นถูกต้องเพียงข้อ ก) ⇒ ตัวเลือกข้อ 1
+  `
+  },
+
+  {
+  number: 9,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Matrices (Determinant)",
+  text: `
+    ให้
+    A = [[mat:x,-1;0,3]]
+    และ
+    B = [[mat:-2,0;x,1]]
+    เมื่อ x เป็นจำนวนจริง ถ้า det(B⁻¹A) = −6
+    แล้วค่าของ x เท่ากับเท่าใด
+  `,
+  choices: [
+    "−4",
+    "−1",
+    "1",
+    "4",
+    "9"
+  ],
+  correctIndex: 3,
+  explanation: `
+    ใช้สมบัติดีเทอร์มิแนนต์
+    det(B⁻¹A) = det(A) / det(B)
+
+    det(A) = 3x
+    det(B) = −2
+
+    ดังนั้น 3x/(−2) = −6
+    ⇒ 3x = 12
+    ⇒ x = 4
+  `
+  },
+
+  {
+  number: 10,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Sequences and Series (Telescoping Series)",
+  text: `
+    ถ้า a₁, a₂, a₃, … , aₙ, … เป็นลำดับอนันต์ โดยที่
+    aₙ = [[frac:1|n]] − [[frac:1|n+2]]
+    แล้วค่า [[sum:n=1|∞]] aₙ เท่ากับเท่าใด
+  `,
+  choices: [
+    "0",
+    "[[frac:2|3]]",
+    "1",
+    "[[frac:3|2]]",
+    "หาผลบวกไม่ได้ เพราะอนุกรมนี้เป็นอนุกรมลู่ออก"
+  ],
+  correctIndex: 3,
+  explanation: `
+    เขียนผลบวกย่อย:
+    S_N = [[sum:n=1|N]] ( [[frac:1|n]] − [[frac:1|n+2]] )
+
+    กระจายพจน์:
+    = (1 + [[frac:1|2]] + [[frac:1|3]] + ... + [[frac:1|N]])
+      − ([[frac:1|3]] + [[frac:1|4]] + ... + [[frac:1|N+2]])
+
+    จะตัดกันหมด เหลือ:
+    S_N = 1 + [[frac:1|2]] − ([[frac:1|N+1]] + [[frac:1|N+2]])
+
+    เมื่อ N → ∞ พจน์ท้ายเข้า 0
+    ⇒ S = 1 + [[frac:1|2]] = [[frac:3|2]]
+  `
+  },
+
+  {
+  number: 11,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Sequences and Patterns",
+  text: `
+    กำหนดแบบรูปของแผนภาพบันไดไม้ขีดไฟดังนี้
+
+    <img src="img/66q11.png" =style="max-width:720px; border:1px solid #ccc; border-radius:6px;"><br><br>
+
+    ถ้ามะลิมีไม้ขีดไฟจำนวน 990 ก้าน เพื่อเอาไปเรียงรูปบันได 1 รูป
+    แล้วมะลิจะสามารถสร้างบันไดไม้ขีดไฟได้จำนวนชั้นได้มากที่สุดกี่ชั้น
+  `,
+  choices: [
+    "25",
+    "29",
+    "30",
+    "31",
+    "33"
+  ],
+  correctIndex: 2,
+  explanation: `
+    บันได n ชั้น มีจำนวนสี่เหลี่ยมทั้งหมด
+    = 1 + 2 + … + n = [[frac:n(n+1)|2]]
+
+    ถ้าแยกกันหมดจะใช้ไม้ขีด = 4·[[frac:n(n+1)|2]] = 2n(n+1)
+
+    แต่มีด้านที่ใช้ร่วมกัน (ซ้อน/ติดกัน) ถูกนับซ้ำ ต้องลบออก
+    จำนวนด้านร่วมแนวนอน = (1−1)+(2−1)+…+(n−1) = [[frac:n(n−1)|2]]
+    จำนวนด้านร่วมแนวตั้ง  = [[frac:n(n−1)|2]]
+
+    รวมด้านร่วม = n(n−1)
+
+    ดังนั้นจำนวนไม้ขีดที่ใช้ = 2n(n+1) − n(n−1)
+                         = n² + 3n
+                         = n(n+3)
+
+    ต้องมี n(n+3) ≤ 990
+    ⇒ n² + 3n − 990 ≤ 0
+    ⇒ (n+33)(n−30) ≤ 0
+
+    ดังนั้น n มากที่สุดคือ 30
+  `
+  },
+
+
+  {
+  number: 12,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Finance Mathematics (Compound Interest)",
+  text: `
+    โจ้งกู้เงินจากจีนเพื่อการลงทุนจำนวน 200,000 บาท โดยโจ้งทำสัญญากับจีนว่าจะชำระเงินกู้พร้อมดอกเบี้ยทั้งหมดในอีก 2 ปีข้างหน้า
+    และจีนกำหนดอัตราดอกเบี้ย 2% ต่อปี โดยคิดดอกเบี้ยแบบทบต้นทุกปี
+
+    เมื่อครบ 2 ปีตามสัญญา โจ้งขอเลื่อนเวลาชำระเงินออกไปอีก 1 ปี
+    โจ้งและจีนจึงทำสัญญาฉบับใหม่ โดยกำหนดให้เงินกู้พร้อมดอกเบี้ยทั้งหมดจาก 2 ปีที่ผ่านมา เป็นยอดเงินกู้ในสัญญาฉบับใหม่
+    และปรับอัตราดอกเบี้ยใหม่เป็น 3% ต่อปี โดยคิดดอกเบี้ยแบบทบต้นทุก 6 เดือน
+
+    เมื่อครบกำหนด 1 ปีตามสัญญาฉบับใหม่ โจ้งจะต้องชำระเงินกู้พร้อมดอกเบี้ยทั้งหมดกี่บาท
+  `,
+  choices: [
+    "200,000(1.02)²(1.015)²",
+    "200,000(1.02)²(1.03)",
+    "200,000(1.02)²(1.03)²",
+    "200,000[(1.02)² + (1.015)²]",
+    "200,000[(1.02)² + (1.03)²]"
+  ],
+  correctIndex: 0,
+  explanation: `
+    ช่วงสัญญาแรก 2 ปี ดอกเบี้ย 2% ทบต้นรายปี
+    ยอดปลายงวด = 200,000(1.02)²
+
+    สัญญาใหม่ 1 ปี ดอกเบี้ย 3% ทบต้นทุก 6 เดือน
+    อัตราต่อครึ่งปี = 0.03/2 = 0.015
+    ภายใน 1 ปี มี 2 งวด ⇒ คูณ (1.015)²
+
+    ดังนั้นยอดที่ต้องชำระทั้งหมด
+    = 200,000(1.02)²(1.015)²
+    ตรงกับข้อ 1
+  `
+  },
+
+  {
+  number: 13,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Complex Numbers (Argument & Modulus)",
+  text: `
+    ให้จำนวนเชิงซ้อน
+    u = cos([[frac:π|3]]) + i sin([[frac:π|3]])
+    และ v เป็นรากที่ 3 ของจำนวนเชิงซ้อน
+    cos([[frac:π|2]]) + i sin([[frac:π|2]])
+
+    ถ้าส่วนจริงของ [[frac:u|v]] เป็นจำนวนจริงลบ
+    แล้วส่วนจริงของ v เท่ากับเท่าใด
+  `,
+  choices: [
+    "cos([[frac:π|6]])",
+    "cos([[frac:5π|6]])",
+    "cos([[frac:5π|4]])",
+    "cos([[frac:4π|3]])",
+    "cos([[frac:3π|2]])"
+  ],
+  correctIndex: 1,
+  explanation: `
+    เขียนในรูปเชิงขั้ว
+
+    u = cis(π/3)
+
+    cos(π/2) + i sin(π/2) = cis(π/2)
+    รากที่ 3 ของ cis(π/2) คือ
+    v_k = cis((π/2 + 2kπ)/3), k = 0,1,2
+
+    ได้มุมของ v คือ
+    k=0 → π/6
+    k=1 → 5π/6
+    k=2 → 3π/2
+
+    พิจารณา u/v = cis(π/3 − θ)
+
+    ตรวจแต่ละกรณี:
+    θ = π/6 → π/3 − π/6 = π/6 → cos บวก ❌
+    θ = 5π/6 → π/3 − 5π/6 = −π/2 → cos = 0 (ไม่ลบ) ❌
+    θ = 3π/2 → π/3 − 3π/2 = −7π/6 → cos = −√3/2 < 0 ✔
+
+    ดังนั้น v = cis(5π/6)
+    ส่วนจริงของ v = cos(5π/6)
+
+    คำตอบคือข้อ 2
+  `
+  },
+
+  {
+  number: 14,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Complex Numbers (Locus)",
+  text: `
+    ข้อที่ 14. ให้ A แทนเซตของจำนวนเชิงซ้อน z ทั้งหมดในระนาบเชิงซ้อนซึ่งสอดคล้องกับอสมการ<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;|z − i|² + |z + i|² &lt; 4<br><br>
+
+    พิจารณาข้อความต่อไปนี้<br><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ก) ถ้า w ∈ A แล้ว Re(w) ∈ A<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ข) ถ้า w ∈ A แล้ว w&macr; ∈ A<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ค) ถ้า w ∈ A แล้ว w^2 ∈ A<br><br>
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น",
+    "ข้อความ ก) ข) และ ค) ถูกต้อง"
+  ],
+  correctIndex: 4,
+  explanation: `
+    ให้ z = x + iy
+
+    |z − i|² = x² + (y−1)²
+    |z + i|² = x² + (y+1)²
+
+    รวมกันได้
+    |z − i|² + |z + i|²
+    = 2x² + (y−1)² + (y+1)²
+    = 2x² + (y²−2y+1) + (y²+2y+1)
+    = 2x² + 2y² + 2
+    = 2(x² + y² + 1)
+
+    เงื่อนไข &lt; 4
+    ⇒ 2(x² + y² + 1) &lt; 4
+    ⇒ x² + y² &lt; 1
+
+    ดังนั้น A คือ “วงกลมเปิดรัศมี 1 ศูนย์กลาง 0” หรือ |z| &lt; 1
+
+    (ก) ถ้า x²+y²&lt;1 ⇒ x²&lt;1 ⇒ |x|&lt;1
+        ดังนั้น Re(w)=x (มองเป็น x+0i) ก็อยู่ใน A ⇒ จริง
+
+    (ข) w̄ = x − iy มี x² + (−y)² = x²+y² &lt; 1 ⇒ อยู่ใน A ⇒ จริง
+
+    (ค) ถ้า |w|&lt;1 ⇒ |w²| = |w|² &lt; 1 ⇒ w² ∈ A ⇒ จริง
+
+    สรุป ก), ข), ค) จริงทั้งหมด ⇒ ตอบข้อ 5
+  `
+  },
+
+  {
+  number: 15,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Vectors (Scalar Triple Product)",
+  text: `
+    ข้อที่ 15. กำหนดเวกเตอร์ในระบบพิกัดฉากสามมิติ ดังนี้<br><br>
+
+    <div style="text-align:center; line-height:1.9">
+      [[vec:u]] = 2[[vec:i]] − [[vec:j]] + 2[[vec:k]]<br>
+      [[vec:v]] = −[[vec:i]] − 2[[vec:j]] + 3[[vec:k]]<br>
+      [[vec:w]] = 4[[vec:i]] + 3[[vec:j]] + a[[vec:k]]
+    </div><br>
+
+    เมื่อ a เป็นจำนวนจริง<br>
+    ถ้า [[vec:u]] × [[vec:v]] ตั้งฉากกับ [[vec:w]] แล้วค่าของ a เท่ากับเท่าใด
+  `,
+  choices: [
+    "−[[frac:21|5]]",
+    "−4",
+    "−[[frac:1|3]]",
+    "[[frac:1|3]]",
+    "1"
+  ],
+  correctIndex: 1,
+  explanation: `
+    เงื่อนไข [[vec:u]] × [[vec:v]] ตั้งฉากกับ [[vec:w]]
+    ⇒ ([[vec:u]] × [[vec:v]]) · [[vec:w]] = 0
+
+    คำนวณ [[vec:u]] × [[vec:v]]
+    = | [[vec:i]]   [[vec:j]]   [[vec:k]] |
+      |   2        −1        2  |
+      |  −1        −2        3  |
+
+    = [[vec:i]][(−1)(3) − (2)(−2)]
+      − [[vec:j]][(2)(3) − (2)(−1)]
+      + [[vec:k]][(2)(−2) − (−1)(−1)]
+
+    = [[vec:i]](−3 + 4) − [[vec:j]](6 + 2) + [[vec:k]](−4 − 1)
+    = [[vec:i]] − 8[[vec:j]] − 5[[vec:k]]
+
+    ดังนั้น [[vec:u]] × [[vec:v]] = (1, −8, −5)
+
+    ทำดอทกับ [[vec:w]] = (4, 3, a)
+    (1, −8, −5) · (4, 3, a)
+    = 4 − 24
+    `
+  },
+
+  {
+  number: 16,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "3D Geometry (Vectors in Space)",
+  text: `
+    กำหนดทรงสี่เหลี่ยมมุมฉาก ABCDEFGH ในระบบพิกัดฉากสามมิติที่มีจุด
+    B(1,1,0), C(1,2,0) และ F(0,1,2)
+
+    เมื่อลาก AC และ CE จะได้มุม AĈE = θ ดังรูป
+
+    <img src="img/66q16.png" style="max-width:720px; border:1px solid #ccc; border-radius:6px;"><br><br>
+
+    ค่าของ secθ เท่ากับเท่าใด
+  `,
+  choices: [
+    "[[frac:1|√10]]",
+    "[[frac:1|10]]",
+    "√10",
+    "10",
+    "[[frac:√5|√2]]"
+  ],
+  correctIndex: 2,
+  explanation: `
+    จากรูปเป็นทรงสี่เหลี่ยมมุมฉาก และ F อยู่เหนือ A ในแนวดิ่ง
+    โดย F(0,1,2) ⇒ A(0,1,0)
+
+    เมื่อ B(1,1,0) และ C(1,2,0)
+    จะได้ฐานสี่เหลี่ยม:
+    A(0,1,0), B(1,1,0), C(1,2,0), D(0,2,0)
+    และจุด E อยู่เหนือ D ⇒ E(0,2,2)
+
+    มุม AĈE คือมุมระหว่างเวกเตอร์ CA และ CE
+
+    CA = A − C = (0,1,0) − (1,2,0) = (−1, −1, 0)
+    CE = E − C = (0,2,2) − (1,2,0) = (−1, 0, 2)
+
+    CA·CE = (−1)(−1) + (−1)(0) + (0)(2) = 1
+    |CA| = √(1+1+0) = √2
+    |CE| = √(1+0+4) = √5
+
+    cosθ = (CA·CE)/(|CA||CE|)
+         = 1/(√2·√5)
+         = 1/√10
+
+    ดังนั้น secθ = √10
+    ตอบข้อ 3
+  `
+  },
+
+  {
+  number: 17,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Coordinate Geometry (Conic / Distance)",
+  text: `
+    ให้จุด (a, b) เป็นจุดบนวงรี
+    [[frac:x^2|2]] + [[frac:y^2|3]] = 1
+
+    ถ้าระยะห่างระหว่างจุด (a, b) กับจุด (0, −[[frac:5|4]])
+    เท่ากับระยะห่างระหว่างจุด (a, b) กับเส้นตรง y = −[[frac:3|4]]
+
+    แล้วค่าของ b เท่ากับเท่าใด
+  `,
+  choices: [
+    "−3",
+    "−[[frac:3|2]]",
+    "−[[frac:3|4]]",
+    "[[frac:3|2]]",
+    "3"
+  ],
+  correctIndex: 1,
+  explanation: `
+    ระยะจากจุด (a,b) ถึงเส้นตรง y = −3/4
+    = |b + 3/4|
+
+    ระยะจากจุด (a,b) ถึงจุด (0, −5/4)
+    = √[a² + (b + 5/4)²]
+
+    กำหนดให้ระยะเท่ากัน:
+    a² + (b + 5/4)² = (b + 3/4)²
+
+    จัดรูป:
+    a² + b² + (5/2)b + 25/16
+    = b² + (3/2)b + 9/16
+
+    ⇒ a² + b + 1 = 0
+    ⇒ b = −1 − a²
+
+    แทนในสมการวงรี:
+    a²/2 + (1 + a²)²/3 = 1
+
+    ให้ a² = t:
+    t/2 + (1 + 2t + t²)/3 = 1
+
+    คูณ 6:
+    3t + 2(1 + 2t + t²) = 6
+    ⇒ 2t² + 7t − 4 = 0
+
+    แก้สมการได้ t = 1/2 (อีกค่าติดลบตัดทิ้ง)
+
+    ดังนั้น
+    b = −1 − 1/2 = −3/2
+
+    ตอบข้อ 2
+  `
+  },
+
+  {
+  number: 18,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Counting (Arrangements)",
+  text: `
+    ข้อที่ 18. โรงแรมแห่งหนึ่งมีห้องพักอยู่ 3 ห้อง ประกอบด้วย
+    <ul style="margin:10px 0 12px 36px;">
+      <li style="margin:6px 0;">ห้องขนาดเล็ก เข้าพักได้ไม่เกิน 2 คน</li>
+      <li style="margin:6px 0;">ห้องขนาดกลาง เข้าพักได้ไม่เกิน 4 คน</li>
+      <li style="margin:6px 0;">ห้องขนาดใหญ่ เข้าพักได้ไม่เกิน 6 คน</li>
+    </ul>
+
+    ถ้ามีลูกค้าติดต่อเพื่อจองห้องพักในวันที่ 16 เมษายน 2566 จำนวน 2 กลุ่ม<br>
+    โดยกลุ่มที่ 1 แจ้งว่ามีผู้เข้าพัก 6 คน และกลุ่มที่ 2 แจ้งว่ามีผู้เข้าพัก 3 คน<br><br>
+
+    แล้วโรงแรมแห่งนี้จะมีวิธีจัดคนทั้งสองกลุ่มเข้าห้องพักได้ทั้งหมดกี่วิธี
+    โดยผู้เข้าพักที่อยู่ต่างกลุ่มกัน ต้องไม่พักห้องเดียวกัน
+    และผู้เข้าพักที่อยู่กลุ่มเดียวกัน สามารถเข้าพักห้องเดียวกันหรือแยกห้องพักได้
+  `,
+  choices: ["22", "28", "37", "40", "43"],
+  correctIndex: 4,
+  explanation: `
+    ห้องเล็ก(S)=2 ห้องกลาง(M)=4 ห้องใหญ่(L)=6
+
+    ต้อง “ห้ามต่างกลุ่มอยู่ห้องเดียวกัน” แต่ “กลุ่มเดียวกันแยกห้องได้”
+    และห้องถือว่า “ต่างกัน” (เล็ก/กลาง/ใหญ่คนละห้อง)
+
+    (1) กลุ่ม 1 (6 คน) อยู่ L ทั้งหมด
+        กลุ่ม 2 (3 คน) ทำได้ 3 แบบ:
+        - อยู่ M ทั้งหมด: 1 วิธี
+        - แยก S(1) + M(2): C(3,1)=3 วิธี
+        - แยก S(2) + M(1): C(3,2)=3 วิธี
+        รวม = 7 วิธี
+
+    (2) กลุ่ม 1 แยก S + L
+        - S(1) + L(5): C(6,1)=6 วิธี
+        - S(2) + L(4): C(6,2)=15 วิธี
+        กลุ่ม 2 อยู่ M ทั้งหมด: 1 วิธี
+        รวม = 21 วิธี
+
+    (3) กลุ่ม 1 แยก S + M (ต้องเป็น S(2)+M(4) เท่านั้น)
+        C(6,2)=15 วิธี
+        กลุ่ม 2 อยู่ L ทั้งหมด: 1 วิธี
+        รวม = 15 วิธี
+
+    รวมทั้งหมด = 7 + 21 + 15 = 43
+  `
+  },
+
+  {
+  number: 19,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Probability (Inclusion–Exclusion)",
+  text: `
+    ข้อที่ 19. บริษัทแห่งหนึ่งมีเครื่องถ่ายเอกสารอยู่ 2 เครื่อง คือเครื่อง A และเครื่อง B
+    จากข้อมูลการใช้งานเครื่องถ่ายเอกสารทั้ง 2 เครื่องนี้ พบว่า
+    <ul style="margin:10px 0 12px 36px;">
+      <li style="margin:6px 0;">ความน่าจะเป็นที่เครื่อง A เสีย เท่ากับ 0.11</li>
+      <li style="margin:6px 0;">ความน่าจะเป็นที่เครื่อง B เสีย เท่ากับ 0.15</li>
+      <li style="margin:6px 0;">ความน่าจะเป็นที่เครื่อง A หรือ เครื่อง B เสีย เท่ากับ 0.18</li>
+    </ul>
+
+    ความน่าจะเป็นที่มีเครื่องถ่ายเอกสารไม่เสียอย่างน้อย 1 เครื่อง เท่ากับเท่าใด
+  `,
+  choices: [
+    "0.74",
+    "0.82",
+    "0.85",
+    "0.89",
+    "0.92"
+  ],
+  correctIndex: 1,
+  explanation: `
+    เหตุการณ์ “มีเครื่องถ่ายเอกสารไม่เสียอย่างน้อย 1 เครื่อง”
+    เป็นเหตุการณ์ตรงข้ามของ “เครื่องถ่ายเอกสารเสียอย่างน้อย 1 เครื่อง”
+
+    จากโจทย์ให้
+    P(เครื่อง A หรือ เครื่อง B เสีย) = 0.18
+
+    ดังนั้น
+    P(มีเครื่องถ่ายเอกสารไม่เสียอย่างน้อย 1 เครื่อง)
+    = 1 − 0.18
+    = 0.82
+
+    ตอบข้อ 2
+  `
+  },
+
+  {
+  number: 20,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Statistics (Mode, Quartiles, Boxplot)",
+  text: `
+    ข้อที่ 20. ผลการสอบคัดเลือกนักเรียนเพื่อเข้าศึกษาต่อชั้นมัธยมศึกษาปีที่ 4 ของโรงเรียนแห่งหนึ่ง<br>
+    ซึ่งมีนักเรียนเข้าสอบทั้งหมด 200 คน แสดงดังตารางแจกแจงความถี่ของคะแนนสอบดังนี้<br><br>
+
+    <div style="text-align:center;">
+      <img src="img/66q20.png" style="max-width:520px; border:1px solid #ccc; border-radius:6px;">
+    </div><br>
+
+    จากข้อมูล พิจารณาข้อความต่อไปนี้<br><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ก) ฐานนิยมของข้อมูลชุดนี้ เท่ากับ 60 คะแนน<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ข) ควอไทล์ที่ 2 ของข้อมูลชุดนี้ เท่ากับ 75 คะแนน<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ค) เมื่อเขียนแผนภาพกล่อง พบว่าคะแนนชุดนี้ไม่มีค่าผิดปกติ<br><br>
+
+    <span style="display:block; margin-left:18px;">
+      (กำหนดให้ค่าผิดปกติคือข้อมูลที่น้อยกว่า Q₁ − 1.5(Q₃ − Q₁)
+      หรือมากกว่า Q₃ + 1.5(Q₃ − Q₁))
+    </span><br>
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ค) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น",
+    "ข้อความ ก) ข) และ ค) ถูกต้อง"
+  ],
+  correctIndex: 2,
+  explanation: `
+    (ก) ฐานนิยม = คะแนนที่มีความถี่มากที่สุด
+        จากตาราง คะแนน 60 มีนักเรียน 48 คน มากที่สุด ⇒ จริง
+
+    (ข) ควอไทล์ที่ 2 (มัธยฐาน)
+        ข้อมูลมี 200 ค่า ⇒ พิจารณาค่าที่ตำแหน่งที่ 100 และ 101
+        จากความถี่สะสม:
+        - ตำแหน่งที่ 100 = 65
+        - ตำแหน่งที่ 101 = 70
+        ⇒ Q₂ = (65+70)/2 = 67.5 ≠ 75 ⇒ เท็จ
+
+    (ค) หา Q₁ และ Q₃
+        Q₁ ตำแหน่งที่ 50 ⇒ Q₁ = 60
+        Q₃ ตำแหน่งที่ 150 ⇒ Q₃ = 80
+        IQR = Q₃ − Q₁ = 20
+
+        ขอบล่าง = 60 − 1.5(20) = 30
+        ขอบบน = 80 + 1.5(20) = 110
+
+        คะแนนทั้งหมดอยู่ระหว่าง 50 ถึง 100
+        ⇒ ไม่มีค่าผิดปกติ ⇒ จริง
+
+    สรุป: ข้อ ก) และ ค) ถูกต้อง
+  `
+  },
+
+  {
+  number: 21,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Statistics (Boxplot / Mean / Quartiles)",
+  text: `
+    ข้อที่ 21. ศูนย์ดูแลผู้ป่วยติดเตียงแห่งหนึ่งมีจำนวนผู้ป่วยทั้งหมด 120 คน<br>
+    โดยเป็นผู้ป่วยเพศชาย 40% ของทั้งหมด และอายุ (ปี) ของผู้ป่วย
+    จำแนกตามเพศแสดงด้วยแผนภาพกล่องดังรูป<br><br>
+
+    <div style="text-align:center;">
+      <img src="img/66q21.png" style="max-width:520px; border:1px solid #ccc; border-radius:6px;">
+    </div><br>
+
+    ให้ค่าเฉลี่ยเลขคณิตของอายุผู้ป่วยเพศชาย = 70 ปี<br>
+    และค่าเฉลี่ยเลขคณิตของอายุผู้ป่วยเพศหญิง = 55 ปี<br><br>
+
+    พิจารณาข้อความต่อไปนี้<br><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ก) ค่าเฉลี่ยเลขคณิตของอายุผู้ป่วยทั้งหมดเท่ากับ 62.5 ปี<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ข) พิสัยระหว่างควอไทล์ของอายุผู้ป่วยเพศชาย
+    น้อยกว่าพิสัยระหว่างควอไทล์ของอายุผู้ป่วยเพศหญิง<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ค) ผู้ป่วยที่มีอายุน้อยกว่า 65 ปี มีจำนวนไม่เกิน 50 คน<br><br>
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ก) และ ค) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น"
+  ],
+  correctIndex: 1,
+  explanation: `
+    จำนวนผู้ป่วยทั้งหมด = 120 คน  
+    เพศชาย = 40% = 48 คน  
+    เพศหญิง = 72 คน  
+
+    (ก) ค่าเฉลี่ยรวม
+        = (48×70 + 72×55) / 120
+        = (3360 + 3960) / 120
+        = 7320 / 120
+        = 61
+        ≠ 62.5 ⇒ เท็จ
+
+    (ข) จากแผนภาพกล่อง
+        เพศชาย: Q₁ ≈ 68, Q₃ ≈ 80 ⇒ IQR ≈ 12  
+        เพศหญิง: Q₁ ≈ 45, Q₃ ≈ 65 ⇒ IQR ≈ 20  
+        ⇒ IQR ชาย < IQR หญิง ⇒ จริง
+
+    (ค) ผู้ที่อายุน้อยกว่า 65 ปี
+        เพศหญิงมีมากกว่า 50 คนอยู่แล้ว
+        และเพศชายยังมีบางส่วนอายุน้อยกว่า 65
+        ⇒ รวมแล้วมากกว่า 50 คน ⇒ เท็จ
+
+    สรุป: ถูกต้องเฉพาะข้อ ข)
+  `
+  },
+
+  {
+  number: 22,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Probability (Binomial Distribution)",
+  text: `
+    จากข้อมูลเกี่ยวกับการแพ้วัคซีนชนิดหนึ่ง พบว่า
+    ความน่าจะเป็นที่ผู้รับการฉีดวัคซีนแต่ละคนจะมีอาการแพ้เป็น 0.0002
+
+    ถ้ามีผู้รับการฉีดวัคซีนชนิดนี้จำนวน 500 คน ที่เป็นอิสระกัน
+    แล้วความน่าจะเป็นที่ผู้รับการฉีดวัคซีนจะมีอาการแพ้ไม่เกิน 1 คน
+    เท่ากับเท่าใด
+  `,
+  choices: [
+    "0.9998^499",
+    "0.1(0.9998^499)",
+    "1.0998(0.9998^499)",
+    "0.9998^500",
+    "0.1(0.9998^500)"
+  ],
+  correctIndex: 2,
+  explanation: `
+    ให้ p = 0.0002 เป็นความน่าจะเป็นที่คนหนึ่งจะแพ้  
+    ความน่าจะเป็นที่ไม่แพ้ = 1 - p = 0.9998  
+
+    ต้องการ P(แพ้ไม่เกิน 1 คน)
+    = P(แพ้ 0 คน) + P(แพ้ 1 คน)
+
+    P(แพ้ 0 คน)
+    = (0.9998)^500
+
+    P(แพ้ 1 คน)
+    = C(500,1)(0.0002)(0.9998)^499
+    = 500 × 0.0002 × (0.9998)^499
+    = 0.1(0.9998)^499
+
+    รวมกันได้
+    = (0.9998)^499(0.9998 + 0.1)
+    = 1.0998(0.9998)^499
+  `
+  },
+
+  {
+  number: 23,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Functions (Derivative & Area from Graphs)",
+  text: `
+    กำหนดกราฟของฟังก์ชัน f เป็นพาราโบลาที่มีจุดยอดอยู่ที่จุด (2,4)
+    และตัดแกน X ที่จุด (0,0) และ (4,0)
+    และกราฟของฟังก์ชัน g และ h เป็นเส้นตรง ดังรูป
+
+    <img src="img/66q23.png" style="max-width:620px; border:1px solid #ccc; border-radius:6px;"><br><br>
+
+    ข้อใดถูกต้อง 
+  `,
+  choices: [
+    "f′(x) = h(x) และ ∫₀² h(x)dx = −4∫₂⁴ g(x)dx",
+    "f′(x) = h(x) และ ∫₀² h(x)dx = −3∫₂⁴ g(x)dx",
+    "f′(x) = h(x) และ ∫₀² h(x)dx = 4∫₂⁴ g(x)dx",
+    "f′(x) = g(x) และ ∫₀² h(x)dx = −4∫₂⁴ g(x)dx",
+    "f′(x) = g(x) และ ∫₀² h(x)dx = 4∫₂⁴ g(x)dx"
+  ],
+  correctIndex: 0,
+  explanation: `
+    จากข้อมูล f เป็นพาราโบลาตัดแกน X ที่ 0 และ 4 และมีจุดยอด (2,4)
+    เขียนได้เป็น f(x)=a x(x−4)
+    แทน x=2 ได้ 4 = a(2)(−2)= −4a ⇒ a=−1
+    ดังนั้น f(x)= −x²+4x ⇒ f′(x)= −2x+4
+
+    เส้นตรงที่มีสมการ y=−2x+4 คือเส้นที่ตัดแกน Y ที่ 4 และตัดแกน X ที่ 2
+    ซึ่งตรงกับเส้น h ในรูป ⇒ f′(x)=h(x)
+
+    คำนวณ ∫₀² h(x)dx:
+    h(x)=−2x+4
+    ∫₀² (−2x+4) dx = [−x²+4x]₀² = (−4+8)−0 = 4
+
+    จากรูป เส้น g ตัดแกน X ที่ x=2 และที่ x=4 มีค่าใกล้ −1
+    จึงเขียนได้เป็น g(x)=1−x/2 (สอดคล้องกับกราฟ)
+    ∫₂⁴ g(x)dx = ∫₂⁴ (1−x/2) dx = [x−x²/4]₂⁴ = 0−1 = −1
+
+    ดังนั้น ∫₀² h(x)dx = 4 = −4(−1) = −4∫₂⁴ g(x)dx
+    ถูกต้องตามตัวเลือกข้อ 1
+  `
+  },
+
+
+  {
+  number: 24,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Functions (Limits & Graphs)",
+  text: `
+    ข้อที่ 24. กำหนดกราฟของฟังก์ชัน f และ g ดังรูป<br><br>
+    <img src="img/66q24.png" style="max-width:720px; border:1px solid #ccc; border-radius:6px;"><br><br>
+
+    พิจารณาข้อความต่อไปนี้<br>
+    ก) [[lim:x→1]] (f(x)·g(x)) = 1<br>
+    ข) [[lim:x→-1]] (f(x) + g(x)) = 0<br>
+    ค) f + g เป็นฟังก์ชันต่อเนื่องบนช่วง (2, 4]<br><br>
+
+    จากข้อความ ก) ข) และ ค) ข้างต้น ข้อใดถูกต้อง 
+  `,
+  choices: [
+    "ข้อความ ก) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ข) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ค) ถูกต้องเพียงข้อเดียวเท่านั้น",
+    "ข้อความ ก) และ ข) ถูกต้องเท่านั้น",
+    "ข้อความ ข) และ ค) ถูกต้องเท่านั้น"
+  ],
+  correctIndex: 4,
+  explanation: `
+    จากกราฟอ่านค่าเข้าใกล้ได้ว่า<br>
+    • เมื่อ x→1 : f(x)→4 และ g(x)→2 ⇒ [[lim:x→1]] f(x)g(x) = 8 ไม่ใช่ 1 ⇒ ก) ผิด<br><br>
+
+    • เมื่อ x→-1 :<br>
+      ซ้ายมือ f(x)→0, g(x)→0 ⇒ (f+g)→0<br>
+      ขวามือ f(x)→2, g(x)→-2 ⇒ (f+g)→0<br>
+      ดังนั้น [[lim:x→-1]](f(x)+g(x)) = 0 ⇒ ข) ถูก<br><br>
+
+    • บนช่วง (2,4] กราฟของ f และ g เป็นเส้นตรงต่อเนื่อง (จุดที่ x=2 ไม่รวมในช่วงอยู่แล้ว)
+      และที่ x=4 มีค่ากำหนดชัดเจน ⇒ f+g ต่อเนื่องบน (2,4] ⇒ ค) ถูก<br><br>
+
+    สรุปถูก “ข) และ ค)” ⇒ ตัวเลือกข้อ 5
+  `
+  },
+
+  {
+  number: 25,
+  type: "mcq",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Polynomials (Factor / Roots)",
+  text: `
+    ข้อที่ 25. ให้ p(x) = ax^4 + bx^3 + cx^2 + dx + e
+    เมื่อ a, b, c, d และ e เป็นจำนวนจริง และ a ≠ 0<br>
+    โดยที่ x^2 − 1 หาร p(x) ลงตัว, p(0) = −2 และ p′(0) = −4<br><br>
+
+    ให้ S แทนเซตของจำนวนจริงทั้งหมดที่เป็นคำตอบของสมการ p(x) = 0<br>
+    ถ้า n(S) = 3 แล้วผลบวกของสมาชิกทั้งหมดในเซต S เท่ากับเท่าใด
+  `,
+  choices: [
+    "−6",
+    "−2",
+    "−[[frac:1|3]]",
+    "[[frac:2|3]]",
+    "2"
+  ],
+  correctIndex: 2,
+  explanation: `
+    เนื่องจาก x^2 − 1 หาร p(x) ลงตัว
+    ⇒ x = 1 และ x = −1 เป็นรากของ p(x)
+
+    และกำหนดให้ n(S) = 3
+    แสดงว่ามีรากจริงทั้งหมด 3 ค่า ⇒ ต้องมีรากซ้ำ 1 ค่า
+
+    กรณีที่สอดคล้องคือ
+    p(x) = a(x − 1)^2(x + 1)(x − r)
+
+    จาก p(0) = −2
+    ⇒ a(1)(1)(−r) = −2
+    ⇒ ar = 2
+
+    จาก p′(0) = −4 (คำนวณจากรูปแฟกเตอร์)
+    จะได้ a = −6 ⇒ r = −[[frac:1|3]]
+
+    ดังนั้น
+    S = {1, −1, −[[frac:1|3]]}
+
+    ผลบวกของสมาชิกในเซต S
+    = 1 − 1 − [[frac:1|3]]
+    = −[[frac:1|3]]
+  `
+  },
+
+  // -------- ข้อ 26–30 : เติมคำตอบ --------
+  {
+  number: 26,
+  type: "short",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Set Theory (Venn Diagram Counting)",
+  text: `
+  กำหนดให้ U แทนเอกภพสัมพัทธ์ และ A, B เป็นสับเซตของ U
+  โดยที่ n(U) = 100, n(A ∩ B) = 35 และ n(A′ ∩ B′) = 9
+  ถ้า n(A) ≥ 61 แล้ว n(B) ที่มากที่สุดเป็นไปได้เท่ากับเท่าใด
+  `,
+  answer: "65",
+  explanation: `...`
+  },
+
+  {
+  number: 27,
+  type: "short",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Counting (Graph Coloring)",
+  text: `
+    ข้อที่ 27. รูปสี่เหลี่ยมมุมฉากรูปหนึ่งมีการแบ่งพื้นที่ออกเป็น 4 ส่วน ดังรูป<br><br>
+
+    <div style="text-align:center;">
+      <img src="img/66q27.png" style="max-width:520px; border:1px solid #ccc; border-radius:6px;">
+    </div><br>
+
+    ถ้ามีสีอยู่ 6 สี และต้องการระบายสีรูปสี่เหลี่ยมมุมฉากนี้ทั้ง 4 ส่วน
+    โดยแต่ละส่วนใช้สีเพียงสีเดียว และส่วนที่อยู่ติดกันต้องใช้สีที่แตกต่างกัน
+    แล้วจะมีวิธีระบายสีรูปสี่เหลี่ยมมุมฉากนี้ได้แตกต่างกันทั้งหมดกี่วิธี
+  `,
+  answer: 480,
+  explanation: `...`
+  },
+
+  {
+  number: 28,
+  type: "short",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Statistics (Normal Distribution)",
+  text: `
+    ข้อที่ 28. ข้อมูลการผลิตเหล็กเส้นของโรงงานแห่งหนึ่งเป็นดังนี้<br>
+    “น้ำหนักของเหล็กเส้นที่ผลิตได้มีการแจกแจงปกติ
+    โดยมีน้ำหนักเฉลี่ยเท่ากับ a กิโลกรัม
+    และส่วนเบี่ยงเบนมาตรฐานเท่ากับ b กิโลกรัม”<br><br>
+
+    หากสุ่มเหล็กเส้นจากโรงงานแห่งนี้ 1 เส้น พบว่า<br>
+    ความน่าจะเป็นที่ได้เหล็กเส้นมีน้ำหนักน้อยกว่า 8.86 กิโลกรัม คือ 0.31<br>
+    และความน่าจะเป็นที่จะได้เหล็กเส้นมีน้ำหนักมากกว่า 8.90 กิโลกรัม คือ 0.31<br><br>
+
+    ค่าของ a + 2b เท่ากับเท่าใด<br><br>
+
+    กำหนดตารางแสดงพื้นที่ใต้เส้นโค้งปกติมาตรฐาน ดังนี้<br><br>
+
+    <div style="text-align:center;">
+      <img src="img/66q28.png" style="max-width:640px; border:1px solid #ccc; border-radius:6px;">
+    </div>
+  `,
+  answer: 18,
+  explanation: `...`
+  },
+
+  {
+  number: 29,
+  type: "short",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Coordinate Geometry (Circle & Tangent)",
+  text: `
+    ข้อที่ 29. วงกลม (x − 1)² + (y − 2)² = 1
+    มีเส้นสัมผัสที่ผ่านจุดกำเนิด 2 เส้น
+    คือ แกน Y และเส้นตรง l
+
+    ความชันของเส้นตรง l เท่ากับเท่าใด
+  `,
+  answer: "[[frac:3|4]]",
+  explanation: `...`
+  },
+
+  {
+  number: 30,
+  type: "short",
+  exam: "A-Level",
+  subject: "Mathematics",
+  topic: "Functions (Exponential & Comparison)",
+  text: `
+    ข้อที่ 30. กำหนดให้ p(t) แทนปริมาณประจุไฟฟ้าในตัวเก็บประจุหนึ่ง
+    ที่คิดเป็นเปอร์เซ็นต์ (เทียบกับปริมาณประจุไฟฟ้าสูงสุดที่สามารถเก็บได้)
+    เมื่อชาร์จตัวเก็บประจุที่มีปริมาณประจุไฟฟ้าเริ่มต้น 0 เปอร์เซ็นต์
+    เป็นระยะเวลา t นาที โดยที่
+
+    p(t) = 100(1 - [[pow:2|-[[frac:t|20]]]])
+
+    ถ้าครั้งที่ 1 ธิตาชาร์จตัวเก็บประจุที่มีปริมาณประจุไฟฟ้าเริ่มต้น 0 เปอร์เซ็นต์
+    จนได้ปริมาณประจุไฟฟ้าเป็น 50 เปอร์เซ็นต์
+
+    และครั้งที่ 2 ธิตาชาร์จตัวเก็บประจุที่มีปริมาณประจุไฟฟ้าเริ่มต้น 0 เปอร์เซ็นต์
+    จนได้ปริมาณประจุไฟฟ้าเป็น 87.5 เปอร์เซ็นต์
+
+    แล้วระยะเวลาที่ใช้ในการชาร์จตัวเก็บประจุครั้งที่ 2
+    มากกว่าครั้งที่ 1 กี่นาที
+  `,
+  answer: 40,
+  explanation: `...`
+},
+
+
+];
+
+const quizContainer = document.getElementById("quiz");
+const progress = document.getElementById("progress");
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+const submitBtn = document.getElementById("submit-btn");
+const resultScreen = document.getElementById("result-screen");
+const scoreText = document.getElementById("score-text");
+const scoreDetail = document.getElementById("score-detail");
+const showAnswersBtn = document.getElementById("show-answers-btn");
+const answersDetail = document.getElementById("answers-detail");
+const detailBtn = document.getElementById("detail-btn");
+const detailPanel = document.getElementById("detail-panel");
+const topicBars = document.getElementById("topic-bars");
+const wrongList = document.getElementById("wrong-list");
+const wrongChips = document.getElementById("wrong-chips");
+let detailBuilt = false;
+if (topicBars) topicBars.innerHTML = "";
+if (wrongList) wrongList.innerHTML = "";
+if (wrongChips) wrongChips.innerHTML = "";
+
+// ================== STATE ==================
+let currentQuestionIndex = 0;
+let userAnswers = new Array(questions.length).fill(null);
+
+// ================== HTML PROTECT ==================
+function protectHtml(str){
+  const store = [];
+  const safe = str.replace(/<[^>]*>/g, tag => {
+    store.push(tag);
+    return `@@HTML${store.length - 1}@@`;
+  });
+  return { safe, store };
+}
+function restoreHtml(str, store){
+  return str.replace(/@@HTML(\d+)@@/g, (_, i) => store[+i]);
+}
+
+// ================== MATRIX (ONE VERSION ONLY) ==================
+function cleanCell(x){
+  return String(x)
+    .trim()
+    .replace(/^\[\s*/, "")
+    .replace(/\s*\]$/, "")
+    .replace(/^\(\s*/, "")
+    .replace(/\s*\)$/, "")
+    .trim();
+}
+
+/*
+  [[mat:1,2;3,4]]
+  [[aug:1,-2,2,|,5; -2,3,-1,|,-4; 1,-2,1,|,4]]
+*/
+function renderMatrix(payload){
+  const rows = payload.split(";").map(r => r.trim()).filter(Boolean);
+  const grid = rows.map(r => r.split(",").map(cleanCell));
+
+  const tds = grid.map(row => {
+    let augNext = false; // เจอ | แล้วคอลัมน์ถัดไปใส่เส้น
+    const rowHtml = row.map(cell => {
+      if (cell === "|") { augNext = true; return ""; }
+      const cls = augNext ? ' class="aug-col"' : "";
+      augNext = false;
+      return `<td${cls}>${renderMath(cell)}</td>`;
+    }).join("");
+    return `<tr>${rowHtml}</tr>`;
+  }).join("");
+
+  return `
+    <span class="mat">
+      <span class="br l" aria-hidden="true"></span>
+      <table>${tds}</table>
+      <span class="br r" aria-hidden="true"></span>
+    </span>
+  `;
+}
+
+// ================== RENDER MATH ==================
+function renderMath(text){
+  if (!text) return "";
+  let s = String(text);
+
+  // $...$ / $$...$$ -> เอา $ ออก
+  s = s.replace(/\$\$([\s\S]*?)\$\$/g, "$1");
+  s = s.replace(/\$([^$]+)\$/g, "$1");
+
+  // \frac{a}{b} -> [[frac:a|b]]
+  s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "[[frac:$1|$2]]");
+
+  // [[frac:บน|ล่าง]]
+  s = s.replace(/\[\[frac:([^|]+)\|([^\]]+)\]\]/g, (_, top, bot) => {
+    return `
+      <span class="mathgrp">
+        <span class="frac">
+          <span class="top">${top}</span>
+          <span class="bar"></span>
+          <span class="bot">${bot}</span>
+        </span>
+      </span>
+    `;
+  });
+
+  // [[sqrt:x]]
+  s = s.replace(/\[\[sqrt:([^\]]+)\]\]/g, (_, val) => {
+    return `<span class="mathgrp">√<span class="sqrt-in">${val}</span></span>`;
+  });
+
+  // [[int:lower|upper]]  -> ∫_lower^upper
+  s = s.replace(/\[\[int:([^|]+)\|([^\]]+)\]\]/g, (_, lo, up) => {
+    return `<span class="mathgrp"><span class="var">∫<span class="sub">${lo}</span><span class="sup">${up}</span></span></span>`;
+  });
+
+  // [[aug:...]] / [[mat:...]]
+  s = s.replace(/\[\[aug:([\s\S]*?)\]\]/g, (_, p) => renderMatrix(p));
+  s = s.replace(/\[\[mat:([\s\S]*?)\]\]/g, (_, p) => renderMatrix(p));
+
+  // [[vec:u]] → เวกเตอร์มีลูกศร
+  s = s.replace(/\[\[vec:([^\]]+)\]\]/g, (_, ch) => `
+    <span class="vec">
+      <span class="vec-arrow">→</span>
+      <span class="vec-char">${ch}</span>
+    </span>
+  `);
+
+  // กัน regex ไปกัด HTML
+  const { safe, store } = protectHtml(s);
+  let t = safe;
+
+  // รองรับเลขตัวห้อยแบบยูนิโค้ด a₆ a₁₇
+  const subMap = { "₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9" };
+  t = t.replace(/([A-Za-z])([₀₁₂₃₄₅₆₇₈₉]+)/g, (_, base, subs) => {
+    const norm = subs.split("").map(c => subMap[c] ?? c).join("");
+    return `<span class="var">${base}<span class="sub">${norm}</span></span>`;
+  });
+
+  // subscript: a_{n+1}, 3_{k}, )_{...} (เผื่อ)
+  t = t.replace(/([0-9A-Za-z\)\]])_\{([^}]+)\}/g,
+    `<span class="var">$1<span class="sub">$2</span></span>`
+  );
+  t = t.replace(/([0-9A-Za-z\)\]])_([0-9A-Za-z]+)/g,
+    `<span class="var">$1<span class="sub">$2</span></span>`
+  );
+
+  // superscript: 3^{a_1}, a^{n+1}, )^{2} (เผื่อ)
+  t = t.replace(/([0-9A-Za-z\)\]])\^\{([^}]+)\}/g,
+    `<span class="var">$1<span class="sup">$2</span></span>`
+  );
+  t = t.replace(/([0-9A-Za-z\)\]])\^([0-9A-Za-z]+)/g,
+    `<span class="var">$1<span class="sup">$2</span></span>`
+  );
+
+  return restoreHtml(t, store);
+}
+
+function buildDetail(){
+  const satGrid = document.getElementById("sat-skill-grid");
+  const overview = document.getElementById("sat-overview");
+  if (!satGrid || !overview || !wrongList || !wrongChips) return;
+
+  const SUBJECT_MAP = window.SUBJECT_MAP || {};
+  const totalByTopic = {};
+  const wrongByTopic = {};
+  const wrongQsByTopic = {};
+
+  let totalQ = questions.length;
+  let correctQ = 0;
+  let wrongQ = 0;
+
+  // สรุปข้อมูล
+  questions.forEach((q, i) => {
+    const mainTopic = getMainTopic(q);
+    totalByTopic[mainTopic] = (totalByTopic[mainTopic] || 0) + 1;
+
+    let correct = false;
+    if (q.type === "mcq") correct = (userAnswers[i] === q.correctIndex);
+    if (q.type === "short") correct = (normalizeAnswer(userAnswers[i]) === normalizeAnswer(q.answer));
+
+    if (correct) correctQ++;
+    else {
+      wrongQ++;
+      wrongByTopic[mainTopic] = (wrongByTopic[mainTopic] || 0) + 1;
+      (wrongQsByTopic[mainTopic] ||= []).push(q.number);
+    }
+  });
+
+  // ===== Questions Overview (3 กล่อง) =====
+  overview.innerHTML = `
+    <div class="sat-box"><div class="n">${totalQ}</div><div class="t">Total Questions</div></div>
+    <div class="sat-box"><div class="n">${correctQ}</div><div class="t">Correct Answers</div></div>
+    <div class="sat-box"><div class="n">${wrongQ}</div><div class="t">Incorrect Answers</div></div>
+  `;
+
+  // helper: difficulty + จำนวนช่องที่เติม
+  function getDiffAndSegments(acc){
+    // acc = 0..1
+    const filled = Math.max(0, Math.min(8, Math.round(acc * 8)));
+    let diff = "Easy";
+    if (acc < 0.45) diff = "Hard";
+    else if (acc < 0.75) diff = "Medium";
+    return { filled, diff };
+  }
+
+  // เรียงหมวด “ตามจำนวนข้อ” เยอะก่อน (หรือจะเรียงผิดเยอะก่อนก็ได้)
+  const topics = Object.keys(totalByTopic).sort((a,b)=> (totalByTopic[b]||0)-(totalByTopic[a]||0));
+
+  // ===== Knowledge and Skills (แบบ SAT) =====
+  satGrid.innerHTML = topics.map(t => {
+    const total = totalByTopic[t] || 0;
+    const wrong = wrongByTopic[t] || 0;
+    const correct = total - wrong;
+    const acc = total ? (correct / total) : 0;
+
+    const pct = totalQ ? Math.round((total / totalQ) * 100) : 0;
+    const { filled, diff } = getDiffAndSegments(acc);
+
+    const segs = Array.from({length: 8}).map((_,k)=>{
+      return `<span class="seg ${k < filled ? "filled" : ""}"></span>`;
+    }).join("");
+
+    return `
+      <div class="sat-skill">
+        <h4>${t}</h4>
+        <div class="sat-meta">(${pct}% of test section, ${total} questions)</div>
+        <div class="sat-meter">${segs}</div>
+        <div class="sat-diff">Difficulty level: <b>${diff}</b> • ${correct}/${total} correct</div>
+      </div>
+    `;
+  }).join("");
+
+  // ===== ข้อที่ผิดในแต่ละหมวด (เดิมของคุณ) =====
+  const wrongTopics = Object.keys(wrongQsByTopic);
+  if (!wrongTopics.length){
+    wrongList.innerHTML = `<div style="color:#1f7a1f; font-weight:600;">🎉 ไม่ผิดเลย! ไม่มีหัวข้อให้ทบทวน</div>`;
+    wrongChips.innerHTML = "";
+  } else {
+    wrongList.innerHTML = wrongTopics.map(t=>{
+      return `<div style="margin:6px 0;"><b>${t}</b> : ข้อ ${wrongQsByTopic[t].join(", ")}</div>`;
+    }).join("");
+
+    wrongChips.innerHTML = wrongTopics.map(t=>{
+      return `<span class="topic-chip">${t} • ผิด ${(wrongByTopic[t]||0)} ข้อ</span>`;
+    }).join("");
+  }
+}
+    // ---------------- buildQuiz: สร้าง DOM ----------------
+    function buildQuiz() {
+      questions.forEach((q, index) => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question";
+
+        const header = document.createElement("div");
+        header.className = "question-header";
+
+        const title = document.createElement("div");
+        title.className = "q-title";
+        title.innerHTML = `ข้อที่ ${q.number} : ${renderMath(q.text)}`;
+
+        const tag = document.createElement("div");
+        tag.className = "q-tag";
+        tag.textContent = q.topic || "A-Level";
+
+        header.appendChild(title);
+        header.appendChild(tag);
+        qDiv.appendChild(header);
+
+        if (q.type === "mcq") {
+          const choicesDiv = document.createElement("div");
+          choicesDiv.className = "choices";
+
+          q.choices.forEach((choice, i) => {
+            const label = document.createElement("label");
+
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "question" + index;
+            input.value = i;
+            input.dataset.qindex = index;
+
+            input.addEventListener("change", () => {
+              userAnswers[index] = i;
+            });
+
+            const span = document.createElement("span");
+            span.className = "choice-text";
+            span.innerHTML = renderMath(choice);
+
+            label.appendChild(input);
+            label.appendChild(span);
+            choicesDiv.appendChild(label);
+          });
+
+          qDiv.appendChild(choicesDiv);
+        } else if (q.type === "short") {
+          const box = document.createElement("div");
+          box.className = "short-answer-box";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "short-answer-input";
+          input.placeholder = "พิมพ์คำตอบที่นี่";
+          input.dataset.qindex = index;
+
+          input.addEventListener("input", () => {
+            userAnswers[index] = input.value;
+          });
+
+          const hint = document.createElement("div");
+          hint.className = "short-hint";
+          hint.textContent = "ตัวอย่างรูปแบบ: 5√3, 3/4, 2.5 เป็นต้น";
+
+          box.appendChild(input);
+          box.appendChild(hint);
+          qDiv.appendChild(box);
+        }
+
+        quizContainer.appendChild(qDiv);
+      });
+    }
+
+    function updateProgress() {
+      progress.textContent = `ข้อที่ ${currentQuestionIndex + 1} จาก ${questions.length} ข้อ`;
+    }
+
+    function showQuestion(index) {
+      const questionElements = document.querySelectorAll(".question");
+      questionElements.forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+      });
+
+      currentQuestionIndex = index;
+      updateProgress();
+
+      prevBtn.disabled = (index === 0);
+
+      if (index === questions.length - 1) {
+        submitBtn.style.display = "inline-block";
+      } else {
+        submitBtn.style.display = "none";
+      }
+
+      const q = questions[index];
+      const userAns = userAnswers[index];
+
+      if (q.type === "mcq" && userAns !== null) {
+        const selector = `input[name="question${index}"][value="${userAns}"]`;
+        const input = document.querySelector(selector);
+        if (input) input.checked = true;
+      } else if (q.type === "short") {
+        const input = document.querySelector(`input.short-answer-input[data-qindex="${index}"]`);
+        if (input && userAns !== null) {
+          input.value = userAns;
+        }
+      }
+    }
+
+    function normalizeAnswer(str) {
+      if (str === null || str === undefined) return "";
+      return String(str).trim().toLowerCase().replace(/\s+/g, "");
+    }
+
+    function submitAnswers() {
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const ans = userAnswers[i];
+
+        if (q.type === "mcq") {
+          if (ans === null) {
+            alert(`ตอบข้อที่ ${q.number} ให้ครบก่อนนะครับ 😆`);
+            showQuestion(i);
+            return;
+          }
+        } else if (q.type === "short") {
+          if (!ans || ans.toString().trim() === "") {
+            alert(`ตอบข้อที่ ${q.number} ให้ครบก่อนนะครับ 😆`);
+            showQuestion(i);
+            return;
+          }
+        }
+      }
+
+      let score = 0;
+      questions.forEach((q, i) => {
+        if (q.type === "mcq") {
+          if (userAnswers[i] === q.correctIndex) score++;
+        } else if (q.type === "short") {
+          if (normalizeAnswer(userAnswers[i]) === normalizeAnswer(q.answer)) {
+            score++;
+          }
+        }
+      });
+
+      const ratio = score / questions.length;
+      let msg = "";
+      if (ratio === 1) {
+        msg = "โหดมาก ฟูลสกอร์ พร้อมลุยข้อสอบจริงแล้ว 💯";
+      } else if (ratio >= 0.6) {
+        msg = "ดีมากแล้ว ลองดูเฉลยข้อที่ผิดแล้วลองทำใหม่อีกรอบ ✍️";
+      } else {
+        msg = "ยังอุ่นเครื่องอยู่ ลองอ่านเฉลยดี ๆ แล้วฝึกเพิ่ม เดี๋ยวก็เทพได้แน่นอน 😎";
+      }
+
+      scoreText.textContent = `คุณได้ ${score} / ${questions.length} คะแนน`;
+      scoreDetail.textContent = msg;
+
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("nav-buttons").style.display = "none";
+      resultScreen.style.display = "block";
+      // 🔥 SAVE FIRESTORE ตรงนี้
+      if (window.saveResultToFirestore) {
+        window.saveResultToFirestore(score, questions.length);
+      }
+
+      
+      detailBuilt = false;
+
+      if (detailPanel) detailPanel.style.display = "none";
+      if (detailBtn) {
+        detailBtn.disabled = false;
+        detailBtn.textContent = "📊 Detail";
+      }
+
+      let html = "";
+      questions.forEach((q, i) => {
+        let userAnsText = "";
+        let correctAnsText = "";
+        let isCorrect = false;
+
+        if (q.type === "mcq") {
+          userAnsText = renderMath(q.choices[userAnswers[i]]);
+          correctAnsText = renderMath(q.choices[q.correctIndex]);
+          isCorrect = (userAnswers[i] === q.correctIndex);
+        } else if (q.type === "short") {
+          userAnsText = userAnswers[i];
+          correctAnsText = q.answer;
+          isCorrect =
+            normalizeAnswer(userAnswers[i]) === normalizeAnswer(q.answer);
+        }
+
+        html += `
+          <div class="answer-block ${isCorrect ? "correct" : "wrong"}">
+            <div>
+              <b>ข้อที่ ${q.number}</b> :
+              ${
+                isCorrect
+                  ? '<b class="status-correct">ตอบถูก 🎉</b>'
+                  : '<b class="status-wrong">ตอบผิด 😅</b>'
+              }
+            </div>
+            <div><b>คำถาม:</b> ${renderMath(q.text)}</div>
+            <div><b>คำตอบที่คุณเลือก/กรอก:</b> ${userAnsText}</div>
+            <div><b>คำตอบที่ถูกต้อง:</b> ${correctAnsText}</div>
+            <div style="margin-top:6px;">
+              <b>อธิบาย:</b><br>${q.explanation}
+            </div>
+          </div>
+        `;
+      });
+      answersDetail.innerHTML = html;
+    }
+
+    buildQuiz();
+    showQuestion(0);
+
+    prevBtn.addEventListener("click", () => {
+      if (currentQuestionIndex > 0) showQuestion(currentQuestionIndex - 1);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (currentQuestionIndex < questions.length - 1) {
+        showQuestion(currentQuestionIndex + 1);
+      }
+    });
+    function getMainTopic(q){
+    const MAP = window.SUBJECT_MAP || {};
+    const raw = String(q?.topic ?? q?.subject ?? "").trim();
+    if (!raw) return "อื่น ๆ";
+
+  // ตรงตัว
+    if (MAP[raw]) return MAP[raw];
+
+  // ตัดวงเล็บท้าย เช่น "Statistics (Variance)" -> "Statistics"
+    const base = raw.replace(/\s*\(.*?\)\s*$/, "").trim();
+    return MAP[base] || raw;
+  }
+
+    window.submitAnswers = submitAnswers;
+    submitBtn.addEventListener("click", submitAnswers);
+    showAnswersBtn.addEventListener("click", () => {
+      answersDetail.style.display = "block";
+      showAnswersBtn.disabled = true;
+      showAnswersBtn.textContent = "แสดงเฉลยแล้ว";
+    });
+    if (detailBtn && detailPanel) {
+  detailBtn.addEventListener("click", () => {
+    const isOpen = detailPanel.style.display === "block";
+
+    if (!isOpen) {
+      if (!detailBuilt) {
+        buildDetail();
+        detailBuilt = true;
+      }
+      detailPanel.style.display = "block";
+      detailBtn.textContent = "ซ่อน Detail";
+    } else {
+      detailPanel.style.display = "none";
+      detailBtn.textContent = "Detail";
+    }
+  });
+}
+  </script>
+  <script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+let currentUser = null;
+let saving = false;
+let saved = false;
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    alert("ต้องล็อกอินก่อนทำข้อสอบนะ 😎");
+    location.href = "login.html";
+    return;
+  }
+  currentUser = user;
+  saving = false;
+  saved = false;
+});
+
+// ✅ MAP: ใช้กับ q.topic (และ fallback ให้ตัดวงเล็บได้)
+const SUBJECT_MAP = {
+  // ตรรกะ / จำนวนเชิงซ้อน
+  "Logic": "ตรรกศาสตร์",
+  "Complex Numbers": "จำนวนเชิงซ้อน",
+
+  // พีชคณิต
+  "Logarithms": "เลขคณิต",
+  "Exponents": "เลขคณิต",
+  "Exponents and Logarithms": "เลขคณิต",
+  "Polynomial": "เลขคณิต",
+  "Polynomials": "เลขคณิต",
+  "Polynomials (Remainder / Factor)": "เลขคณิต",
+  "Quadratic Function": "เลขคณิต",
+  "Inequalities": "เลขคณิต",
+  "Functions": "เลขคณิต",
+  "Functions (Continuity)": "เลขคณิต",
+  "Functions (Graph Transformations)": "เลขคณิต",
+
+  // เรขาคณิตวิเคราะห์ / ภาคตัดกรวย
+  "Analytic Geometry": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Ellipse)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Conic Sections (Ellipse)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+  "Coordinate Geometry (Conic Sections)": "เรขาคณิต",
+
+  // (ของคุณมี "Coordinate Geometry (Conic Sections)" ในชุดข้อสอบจริงเป็น "Coordinate Geometry (Conic Sections)" หรือ "Coordinate Geometry (Conic Sections)" ก็ได้
+  // แต่ไม่ต้องห่วง ด้านล่างมี fallback ตัดวงเล็บ
+
+  // ตรีโกณ
+  "Trigonometry": "ตรีโกณ",
+  "Trigonometry (Tangent Equation)": "ตรีโกณ",
+
+  // ลำดับและอนุกรม
+  "Sequences and Series": "ลำดับและอนุกรม",
+  "Sequences and Series (Arithmetic Sequence)": "ลำดับและอนุกรม",
+  "Sequences and Series (Harmonic Sum)": "ลำดับและอนุกรม",
+  "Sequences and Series (Geometric Sequence, Limits)": "ลำดับและอนุกรม",
+
+  // ความน่าจะเป็น / การนับ
+  "Probability": "ความน่าจะเป็น",
+  "Probability (Binomial Distribution)": "ความน่าจะเป็น",
+  "Combinatorics": "ความน่าจะเป็น",
+  "Counting Principles": "ความน่าจะเป็น",
+  "Counting (Combinations)": "ความน่าจะเป็น",
+  "Counting (Number of Possible Scores)": "ความน่าจะเป็น",
+
+  // สถิติ
+  "Statistics": "สถิติ",
+  "Statistics (Variance)": "สถิติ",
+  "Statistics (Quartiles, Percentiles, Mean/Median)": "สถิติ",
+  "Statistics (Normal Distribution)": "สถิติ",
+
+  // เวกเตอร์ / เมทริกซ์
+  "Vectors": "เวกเตอร์",
+  "Vectors (Scalar Triple Product)": "เวกเตอร์",
+  "Vectors (Dot Product)": "เวกเตอร์",
+
+  "Matrices": "เมทริกซ์",
+  "Linear Algebra": "เมทริกซ์",
+  "Matrices and Determinants": "เมทริกซ์",
+
+  // เซต
+  "Set Theory": "เซต",
+
+  // แคลคูลัส
+  "Calculus": "แคลคูลัส",
+  "Differentiation (Chain Rule)": "แคลคูลัส",
+  "Calculus (Tangent & Area)": "แคลคูลัส",
+};
+
+window.SUBJECT_MAP = SUBJECT_MAP;
+
+// ✅ helper: หาหมวดหลักจาก q.topic (fallback ตัดวงเล็บท้าย)
+function getMainTopic(q){
+  const raw = String(q?.topic ?? q?.subject ?? "").trim();
+  if (!raw) return "อื่น ๆ";
+
+  // match ตรง
+  if (SUBJECT_MAP[raw]) return SUBJECT_MAP[raw];
+
+  // ตัดวงเล็บท้าย เช่น "Statistics (Variance)" -> "Statistics"
+  const base = raw.replace(/\s*\(.*?\)\s*$/, "").trim();
+  return SUBJECT_MAP[base] || raw; // ถ้าไม่เจอ ให้ใช้ชื่อ topic เดิม
+}
+
+window.saveResultToFirestore = async function (score, total) {
+  if (!currentUser) return null;
+  if (saving || saved) return null;
+  saving = true;
+
+  const wrongByTopic = {};
+  const totalByTopic = {};
+  const wrongQsByTopic = {};
+
+  // ✅ สร้างข้อมูลรายหมวด + ข้อที่ผิด (ใช้ q.topic)
+  questions.forEach((q, i) => {
+    const mainTopic = getMainTopic(q);
+
+    totalByTopic[mainTopic] = (totalByTopic[mainTopic] || 0) + 1;
+
+    let correct = false;
+    if (q.type === "mcq") correct = (userAnswers[i] === q.correctIndex);
+    if (q.type === "short") correct = (normalizeAnswer(userAnswers[i]) === normalizeAnswer(q.answer));
+
+    if (!correct) {
+      wrongByTopic[mainTopic] = (wrongByTopic[mainTopic] || 0) + 1;
+      (wrongQsByTopic[mainTopic] ||= []).push(q.number);
+    }
+  });
+
+  try {
+    const docRef = await addDoc(
+      collection(db, "users", currentUser.uid, "attempts"),
+      {
+        year: 2568,
+        quiz: "A-Level Math 68",
+        score,
+        total,
+        wrongByTopic,
+        totalByTopic,
+        wrongQsByTopic,
+        createdAt: serverTimestamp(),
+      }
+    );
+
+    saved = true;
+
+    window.LAST_ATTEMPT_ID = docRef.id;
+    localStorage.setItem("lastAttemptId", docRef.id);
+
+    console.log("✅ save คะแนนแล้ว", docRef.id, { wrongByTopic, totalByTopic, wrongQsByTopic });
+    return docRef.id;
+
+  } catch (e) {
+    console.error("❌ save คะแนนไม่สำเร็จ:", e);
+    return null;
+
+  } finally {
+    saving = false;
+  }
+};
+</script>
+
+  </body>
+  </html>

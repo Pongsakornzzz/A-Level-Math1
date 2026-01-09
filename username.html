@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Set Username</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,">
+  <style>
+    *{ box-sizing:border-box; font-family:"Prompt",system-ui,sans-serif; }
+    body{
+      min-height:100vh; margin:0; display:grid; place-items:center;
+      background:
+        radial-gradient(900px 500px at 50% 35%, rgba(110,231,255,.55), transparent 60%),
+        radial-gradient(900px 600px at 80% 85%, rgba(255,214,110,.55), transparent 60%),
+        linear-gradient(135deg, #f7fbff, #fff7fb);
+      padding: 28px 16px;
+    }
+    .wrap{ width: 420px; max-width: 92vw; }
+
+    .card{
+      position:relative;
+      border:4px solid #111;
+      border-radius:16px;
+      background: linear-gradient(135deg, #6ee7ff, #ffd66e);
+      box-shadow: 12px 12px 0 #111;
+      padding: 20px;
+      overflow:hidden;
+    }
+    .card::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:16px;
+      background:#111;
+      transform: translate(10px,10px);
+      z-index:-1;
+      opacity:.85;
+    }
+
+    h1{
+      margin: 4px 0 6px;
+      text-align:center;
+      font-size: 22px;
+      font-weight: 800;
+      color:#111;
+      letter-spacing:.5px;
+    }
+    p{
+      margin: 0 0 14px;
+      text-align:center;
+      color: rgba(17,17,17,.8);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .input{
+      width:100%;
+      padding: 12px 12px;
+      border:3px solid #111;
+      border-radius:12px;
+      background: rgba(255,255,255,.95);
+      box-shadow: 4px 4px 0 #111;
+      font-size: 14px;
+      font-weight: 700;
+      outline:none;
+      transition: transform .12s, box-shadow .12s;
+    }
+    .input:focus{
+      transform: translate(2px,2px);
+      box-shadow: 2px 2px 0 #111;
+    }
+
+    .btn{
+      width:100%;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border:0;
+      border-radius: 12px;
+      background:#111;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .6px;
+      cursor:pointer;
+      box-shadow: 4px 4px 0 rgba(17,17,17,.25);
+      transition: transform .12s, box-shadow .12s;
+    }
+    .btn:hover{
+      transform: translate(2px,2px);
+      box-shadow: 2px 2px 0 rgba(17,17,17,.25);
+    }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; transform:none; }
+
+    .msg{
+      margin-top: 10px;
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(17,17,17,.85);
+    }
+    .msg.err{ color:#b00020; }
+    .msg.ok{ color:#0a6b2b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>ตั้งชื่อผู้ใช้</h1>
+      <p>ใส่ชื่อที่อยากให้แสดงในระบบก่อนเข้าใช้งาน</p>
+
+      <input id="username" class="input" placeholder maxlength="20" />
+      <button id="saveBtn" class="btn">CONTINUE</button>
+
+      <div id="msg" class="msg"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const u = document.getElementById("username");
+    const btn = document.getElementById("saveBtn");
+    const msg = document.getElementById("msg");
+
+    const setMsg = (t, type) => {
+      msg.classList.remove("ok","err");
+      if(type) msg.classList.add(type);
+      msg.textContent = t || "";
+    };
+
+    // กันคนยังไม่ login เข้ามาหน้านี้
+    let currentUser = null;
+    onAuthStateChanged(auth, (user) => {
+      if(!user){
+        location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+    });
+
+    function validUsername(name){
+      // อนุญาต ไทย/อังกฤษ/เลข/underscore/เว้นวรรค 3-20 ตัว
+      const s = name.trim();
+      if(s.length < 3 || s.length > 20) return false;
+      return /^[A-Za-z0-9_\u0E00-\u0E7F ]+$/.test(s);
+    }
+
+    async function save(){
+      const name = u.value.trim();
+
+      if(!validUsername(name)){
+        setMsg("ชื่อผู้ใช้ต้อง 3–20 ตัว (ไทย/อังกฤษ/เลข/_/เว้นวรรค) และห้ามมีสัญลักษณ์แปลกๆ", "err");
+        return;
+      }
+      if(!currentUser){
+        setMsg("ยังไม่พร้อมใช้งาน ลองใหม่อีกที", "err");
+        return;
+      }
+
+      try{
+        btn.disabled = true;
+        btn.textContent = "SAVING...";
+        setMsg("");
+
+        await setDoc(doc(db, "users", currentUser.uid), {
+          username: name,
+          usernameLower: name.toLowerCase(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        localStorage.setItem("username", name);
+        setMsg("บันทึกสำเร็จ ✅ กำลังเข้าใช้งาน...", "ok");
+        setTimeout(()=> location.href = "index.html", 500);
+
+      }catch(e){
+        console.error(e);
+        setMsg("บันทึกไม่ได้ (เช็ค Firestore / Rules / Login)", "err");
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "CONTINUE";
+      }
+    }
+
+    btn.addEventListener("click", save);
+    u.addEventListener("keydown", (e)=>{ if(e.key === "Enter") save(); });
+  </script>
+</body>
+</html>
